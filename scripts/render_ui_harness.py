@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +19,15 @@ OUT = ROOT / "docs" / "desktop.png"
 
 
 def main() -> int:
+    if not FIXTURE.exists():
+        import subprocess
+        import sys
+
+        subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "build_ui_fixture.py")],
+            check=True,
+            env={**os.environ, "PYTHONPATH": str(ROOT)},
+        )
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
     handler = partial(SimpleHTTPRequestHandler, directory=str(ROOT))
     server = ThreadingHTTPServer(("127.0.0.1", 8123), handler)
