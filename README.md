@@ -1,15 +1,16 @@
-# Table
+# Igni
 
-**Card games inside Hermes.** Two real, deterministic engines — a Gwent-shaped
+**Card games at the sign of fire.** Two real, deterministic engines — a Gwent-shaped
 row war and a Hearthstone-shaped mana duel — played against a rule-based
 opponent that keeps its hand hidden. Play from chat with the agent, from a live
 TUI scoreboard, or from a full desktop page with clickable cards.
 
-No API keys. No network. Standard library only on the engine side.
+The plugin is **Igni**; `table` is its game surface (`table_*` tools,
+`/table`, `hermes table`). No API keys, no network, stdlib only on the engine side.
 
-![Table — a Hermes plugin cover](docs/cover.png)
+![Igni — a Hermes plugin cover](docs/cover.png)
 
-![Table page with pixel-art cards](docs/desktop.png)
+![Igni table page with pixel-art cards](docs/desktop.png)
 
 
 ```text
@@ -41,7 +42,7 @@ Your move: play <hand#> [row] for a horn, or pass.
 ## Why this exists
 
 A game is a better demo of an agent than another dashboard. It has real state, a
-visible opponent, hidden information, and a rule engine that says *no*. Table
+visible opponent, hidden information, and a rule engine that says *no*. Igni
 puts that inside Hermes without turning the agent into a rules lawyer: the
 engine validates every move, the agent relays yours, and the opponent's hand
 never leaves the process.
@@ -149,7 +150,7 @@ entry point above.
 /table-board
 ```
 
-It reads the hand-free snapshot at `$HERMES_HOME/table/board.json` once a
+It reads the hand-free snapshot at `$HERMES_HOME/igni/board.json` once a
 second. It never includes the opponent's cards.
 
 ## Desktop
@@ -157,18 +158,18 @@ second. It never includes the opponent's cards.
 The same package ships the desktop half:
 
 ```text
-desktop/plugin.js       full page at /table, clickable cards, sidebar nav row,
-                        ⌘K "Table: open the card table", statusbar chip
-dashboard/plugin_api.py /api/plugins/table/{state,new,move,rules,art/{key}}
+desktop/plugin.js       full page at /igni, clickable cards, sidebar nav row,
+                        ⌘K "Igni: open the card table", statusbar chip
+dashboard/plugin_api.py /api/plugins/igni/{state,new,move,rules,art/{key}}
 ```
 
 The page plays both games without the chat agent: click a card, pick a row or
 target, summon, attack, pass. It polls the backend and also subscribes to
-`plugin.table.moved`.
+`plugin.igni.moved`.
 
-The desktop half is opt-in: **Capabilities → Plugins → Table** (and **Rescan**
-after installing). The Python half is gated separately by
-`hermes plugins enable table`.
+The desktop half loads by default for this package; turn it off in
+**Capabilities → Plugins → Igni** if you don't want it. The Python half
+is gated separately by `hermes plugins enable igni`.
 
 ## Install
 
@@ -176,15 +177,15 @@ From this checkout:
 
 ```bash
 python3 scripts/sync_plugin.py
-hermes plugins enable table
+hermes plugins enable igni
 hermes table install-widget
 ```
 
 Then start a new session (tools and the prompt section land next session; hooks
 and slash commands hot-reload). Reload the TUI widgets with `/widgets-reload`
-and open `/table-board`. In the desktop app, rescan plugins and enable Table.
+and open `/table-board`. In the desktop app, rescan plugins and open Igni.
 
-Once the repo is published, `hermes plugins install LangerSword/hermes-table`
+Once the repo is published, `hermes plugins install LangerSword/hermes-igni`
 installs the same folder.
 
 ## Verify
@@ -227,7 +228,7 @@ scripts/             sync, art build, cover render, desktop probe
 ```
 
 State lives in the plugin data directory (one active table per profile) and in
-`$HERMES_HOME/table/board.json` for the widget. Both are JSON and atomic.
+`$HERMES_HOME/igni/board.json` for the widget. Both are JSON and atomic.
 
 ## Limits
 

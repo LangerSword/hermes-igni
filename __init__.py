@@ -1,4 +1,4 @@
-"""Table: card games inside Hermes.
+"""Igni: card games inside Hermes.
 
 Two deterministic engines (Gwent-style row warfare and an Arena mana duel),
 four tools, a `/table` slash command, a `hermes table` CLI, a live TUI
@@ -12,7 +12,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 TOOLSET = "table"
 

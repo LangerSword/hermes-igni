@@ -2,7 +2,7 @@
  * Table — live TUI scoreboard.
  *
  * Reads the hand-free snapshot the plugin writes at
- * $HERMES_HOME/table/board.json. Ambient only: it never takes the keyboard.
+ * $HERMES_HOME/igni/board.json. Ambient only: it never takes the keyboard.
  * Open with /table-board; play through the agent tools (or the desktop page).
  */
 
@@ -12,7 +12,7 @@ export default function register(sdk) {
   const { Dialog, Text, defineWidgetApp, h } = sdk
   const React = sdk.React
   const HOME = process.env.HERMES_HOME || `${process.env.HOME}/.hermes`
-  const PATH = `${HOME}/table/board.json`
+  const PATH = `${HOME}/igni/board.json`
 
   function read() {
     try {

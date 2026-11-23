@@ -1,7 +1,7 @@
 """Persistence: one active table per profile, plus a hand-free widget snapshot.
 
 State lives under the plugin data directory (profile-scoped). The TUI widget
-reads a small JSON file at ``$HERMES_HOME/table/board.json``; that path is
+reads a small JSON file at ``$HERMES_HOME/igni/board.json``; that path is
 documented and deliberately contains no hidden cards.
 """
 
@@ -20,7 +20,7 @@ try:  # package import under Hermes
 except ImportError:  # standalone
     from table_render import snapshot  # type: ignore
 
-PLUGIN_ID = "table"
+PLUGIN_ID = "igni"
 
 
 def hermes_home() -> Path:
@@ -56,7 +56,7 @@ def _atomic_write(path: Path, text: str) -> None:
 
 
 def widget_path() -> Path:
-    return hermes_home() / "table" / "board.json"
+    return hermes_home() / "igni" / "board.json"
 
 
 def save(state: dict) -> None:

@@ -38,7 +38,7 @@ registered handlers.
 ## Plugin validation
 
 ```text
-$ hermes plugins validate /home/lakshaya/projects/hermes-table
+$ hermes plugins validate /home/lakshaya/projects/hermes-igni
 ✓ manifest — plugin.yaml parses
 ✓ loadable — entry: __init__.py, desktop/plugin.js
 ✓ capability probe — register() ran in isolation
@@ -49,14 +49,14 @@ $ hermes plugins validate /home/lakshaya/projects/hermes-table
 ✓ desktop surface — stays inside the plugin SDK surface
 Validation passed.
 
-$ hermes plugins doctor /home/lakshaya/.hermes/plugins/table
+$ hermes plugins doctor /home/lakshaya/.hermes/plugins/igni
   OK: runtime discovery, manifest parsing, import, and registration passed
   registrations: 4 tool(s), 0 hook(s)
 ```
 
 ## Live plugin
 
-`hermes plugins enable table` loaded it into the gateway; after the v0.2 code
+`hermes plugins enable igni` loaded it into the gateway; after the v0.3 code
 changes it was cycled with `disable` + `enable` so the running module matched
 the installed files.
 
@@ -88,7 +88,7 @@ Opponent play Tibor Eggebracht (10) to ranged.
 - **Cards:** 21 WebP files in `art/`, each 256×256 and quantized to 24 colours
   from a 1K generation. The contact sheet is `docs/card-art-grid.png`.
   `scripts/build_card_art.py` rebuilds them from the raw cache.
-- **API:** `GET /api/plugins/table/art/gwent_infantry` returns `ok=True` with a
+- **API:** `GET /api/plugins/igni/art/gwent_infantry` returns `ok=True` with a
   `data:image/webp;base64,...` payload (tested with FastAPI TestClient).
   Unknown keys return `ok=False`.
 - **Desktop page:** rendered through the plugin's own SDK harness with a
@@ -98,8 +98,9 @@ Opponent play Tibor Eggebracht (10) to ranged.
   not crash the page.
 - **Packaged app:** the earlier pre-art version was played end-to-end in the
   real app (Sigismund Dijkstra → Play; score 14, hand/deck updated, separate
-  `hermes table board` read the same state). The refreshed desktop half is
-  copied and current; the app needs one relaunch/Rescan to load the new UI.
+  `hermes table board` read the same state). The renamed desktop half is copied and current, and ships
+  `defaultEnabled: true` so the rename keeps the previously enabled state; the
+  app needs one relaunch/Rescan to load it.
   The GUI launch was not repeated after the art change because launching the
   desktop is a user-approved action.
 
@@ -110,4 +111,4 @@ Opponent play Tibor Eggebracht (10) to ranged.
 ```
 
 The ambient scoreboard reads the hand-free snapshot at
-`~/.hermes/table/board.json`; `table_new` now installs it automatically.
+`~/.hermes/igni/board.json`; `table_new` now installs it automatically.

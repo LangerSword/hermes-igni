@@ -1,11 +1,11 @@
-name: table
-label: Table
+name: igni
+label: Igni
 kind: standalone
-version: 0.2.0
+version: 0.3.0
 author: Lakshaya Sharma (LangerSword)
-homepage: https://github.com/LangerSword/hermes-table
+homepage: https://github.com/LangerSword/hermes-igni
 description: >
-  Card games inside Hermes. Two complete deterministic engines — Gwent-style
+  Card games at the sign of fire. Two complete deterministic engines — Gwent-style
   row warfare (weather, spies, horns, scorch, best of three) and an Arena mana
   duel (30 health, taunts, charge, divine shield, spells) — played against a
   rule-based opponent that keeps its hand hidden. Four tools (table_new,

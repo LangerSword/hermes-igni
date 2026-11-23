@@ -22,7 +22,7 @@ import {
 import { jsx, jsxs } from 'react/jsx-runtime'
 import { useEffect, useMemo, useState } from 'react'
 
-const ID = 'table'
+const ID = 'igni'
 const ROWS = ['melee', 'ranged', 'siege']
 
 // Pixel-art cards are fetched once per key from /api/plugins/table/art/<key>
@@ -596,7 +596,7 @@ function TablePage({ ctx }) {
   const header = jsxs('div', {
     style: S.header,
     children: [
-      jsx('div', { style: S.title, children: 'TABLE' }),
+      jsx('div', { style: S.title, children: 'IGNI' }),
       jsx('span', {
         style: {
           color: C.accent,
@@ -606,7 +606,7 @@ function TablePage({ ctx }) {
         },
         children: '▮'
       }),
-      jsx('div', { style: { ...S.subtle, flex: '1 1 auto' }, children: 'Gwent row warfare · Arena mana duel' }),
+      jsx('div', { style: { ...S.subtle, flex: '1 1 auto' }, children: 'The fire sign · Gwent / Arena' }),
       jsx(Button, {
         size: 'xs',
         variant: 'outline',
@@ -898,7 +898,7 @@ function TableChip() {
   return jsx('button', {
     type: 'button',
     title: 'Open the card table',
-    onClick: () => host.navigate('/table'),
+    onClick: () => host.navigate('/igni'),
     style: {
       display: 'inline-flex',
       alignItems: 'center',
@@ -911,36 +911,36 @@ function TableChip() {
       cursor: 'pointer',
       fontSize: '11px'
     },
-    children: '♠ table'
+    children: '🔥 igni'
   })
 }
 
 export default {
   id: ID,
-  name: 'Table',
-  defaultEnabled: false,
+  name: 'Igni',
+  defaultEnabled: true,
   register(ctx) {
     ctx.register({
       id: 'page',
       area: ROUTES_AREA,
-      data: { path: '/table' },
+      data: { path: '/igni' },
       render: () => jsx(TablePage, { ctx })
     })
 
     ctx.register({
       id: 'nav',
       area: SIDEBAR_NAV_AREA,
-      data: { path: '/table', label: 'Table', codicon: 'symbol-event' }
+      data: { path: '/igni', label: 'Igni', codicon: 'symbol-event' }
     })
 
     ctx.register({
       id: 'open',
       area: PALETTE_AREA,
       data: {
-        id: 'table.open',
-        label: 'Table: open the card table',
+        id: 'igni.open',
+        label: 'Igni: open the card table',
         keywords: ['table', 'cards', 'gwent', 'arena', 'hearthstone', 'game'],
-        run: () => host.navigate('/table')
+        run: () => host.navigate('/igni')
       }
     })
 
@@ -951,7 +951,7 @@ export default {
       render: () => jsx(TableChip, {})
     })
 
-    host.onEvent('plugin.table.moved', () => {
+    host.onEvent('plugin.igni.moved', () => {
       queryClient.invalidateQueries({ queryKey: ['table', 'state'] })
     })
   }

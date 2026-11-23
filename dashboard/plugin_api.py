@@ -53,7 +53,7 @@ def _broadcast(event: str, payload: dict[str, Any]) -> None:
     try:
         from hermes_cli.plugin_events import broadcast_plugin_event
 
-        broadcast_plugin_event("table", event, payload)
+        broadcast_plugin_event("igni", event, payload)
     except Exception:
         pass
 
@@ -137,7 +137,7 @@ def move(req: MoveRequest) -> dict:
 
 @router.get("/health")
 def health() -> dict:
-    return {"ok": True, "plugin": "table"}
+    return {"ok": True, "plugin": "igni"}
 
 
 @router.get("/art/{key}")

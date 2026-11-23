@@ -45,7 +45,7 @@ def main() -> int:
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parents[1]
-    live = hermes_home() / "plugins" / "table"
+    live = hermes_home() / "plugins" / "igni"
     widget_src = repo / "tui" / "table-board.mjs"
     widget_dst = hermes_home() / "tui-widgets" / "table-board.mjs"
 
