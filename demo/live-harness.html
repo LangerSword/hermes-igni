@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Igni live table</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+  :root {
+    --ui-text-primary: #ece6d9;
+    --ui-text-secondary: #cbc4b4;
+    --ui-text-tertiary: #a49d8d;
+    --ui-text-quaternary: #797367;
+    --ui-stroke-secondary: #3b3831;
+    --ui-bg-quaternary: #181714;
+    --chrome-action-hover: #26241f;
+    --ui-accent: #efb45e;
+    --ui-bg-primary: #0d0c0a;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  html, body {
+    margin: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: #050505;
+    color: #ece6d9;
+    font-family: var(--font-mono);
+  }
+  body {
+    background:
+      radial-gradient(circle at 50% 45%, rgba(239,180,94,.10), transparent 42%),
+      radial-gradient(circle at 50% 50%, rgba(27,77,255,.08), transparent 58%),
+      #050505;
+  }
+  #frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1100px;
+    height: 800px;
+    transform: translate(-50%, -50%) scale(1.2);
+    transform-origin: center center;
+    border: 1px solid rgba(239,180,94,.28);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.8),
+      0 40px 120px rgba(0,0,0,.82),
+      0 0 80px rgba(239,180,94,.06);
+    overflow: hidden;
+    animation: drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { transform: translate(-50%, -50%) scale(1.19); }
+    to   { transform: translate(-50%, -50%) scale(1.26); }
+  }
+  #root { width: 1100px; height: 800px; }
+  #cursor {
+    position: fixed;
+    z-index: 999999;
+    width: 26px;
+    height: 26px;
+    pointer-events: none;
+    filter: drop-shadow(1px 2px 2px rgba(0,0,0,.55));
+    transition: left .09s linear, top .09s linear;
+  }
+  #label {
+    position: absolute;
+    left: 70px;
+    top: 54px;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: rgba(236,230,217,.42);
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client",
+    "@hermes/plugin-sdk": "./sdk-live-stub.js"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="frame"><div id="root"></div></div>
+  <div id="cursor"></div>
+  <script type="module">
+    import plugin from '../desktop/plugin.js'
+    import { createRoot } from 'react-dom/client'
+
+    const API = '/api/plugins/igni'
+    async function rest(path, options = {}) {
+      const init = { method: options.method || 'GET', headers: {} }
+      if (options.body !== undefined) {
+        init.headers['Content-Type'] = 'application/json'
+        init.body = JSON.stringify(options.body)
+      }
+      const response = await fetch(API + path, init)
+      return response.json()
+    }
+
+    let page = null
+    const ctx = {
+      rest,
+      register(contribution) {
+        if (contribution && contribution.id === 'page') page = contribution
+      }
+    }
+    plugin.register(ctx)
+    if (!page) throw new Error('Igni page did not register')
+    createRoot(document.getElementById('root')).render(page.render())
+
+    const cursor = document.getElementById('cursor')
+    cursor.innerHTML = `
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 3L19 12L12 13L9 20L5 3Z" fill="#F7EDE3" stroke="#11100D" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>`
+    document.addEventListener('mousemove', event => {
+      cursor.style.left = `${event.clientX}px`
+      cursor.style.top = `${event.clientY}px`
+    })
+    // A click pulse for the recorder.
+    document.addEventListener('mousedown', () => {
+      cursor.style.transform = 'scale(.82)'
+    })
+    document.addEventListener('mouseup', () => {
+      cursor.style.transform = 'scale(1)'
+    })
+  </script>
+</body>
+</html>

@@ -8,6 +8,8 @@ clickable desktop table.
 [![tests](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml/badge.svg)](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+**[60 second demo](https://github.com/LangerSword/hermes-igni/releases/tag/v0.3.1)**: the real table, both games, and the hidden-hand boundary.
+
 ![Igni cover: a print artifact with the word IGNI and a fanned pixel hand](docs/cover.png)
 
 ## What is Igni?
@@ -193,7 +195,8 @@ hand-free scoreboard snapshot at `$HERMES_HOME/igni/board.json`.
 Built for Hermes Agent. Fonts are under the SIL Open Font License; see
 `assets/fonts/README.md` and the `OFL-*.txt` files. Pixel art was generated for
 this project and quantized to 24 colours. No assets from a commercial game are
-included.
+included. Demo music: "Achaidh Cheide" by Kevin MacLeod (incompetech.com),
+CC BY 4.0; see `demo/CREDITS.md`.
 
 If Igni earns a spot in your setup, star the repo. That is the whole ask.
 

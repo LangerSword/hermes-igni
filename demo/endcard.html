@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Igni end card</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton-Regular.ttf'); }
+  @font-face { font-family: 'Playfair'; src: url('../assets/fonts/PlayfairDisplay.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Regular.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Bold.ttf'); font-weight: 700; }
+  :root { --ink:#11100d; --paper:#e7dcc2; --cobalt:#1b4dff; --verm:#c8452f; --acid:#d8c34a; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#050505; }
+  body { font-family:'Plex', monospace; color:var(--ink); }
+  #stage { position:absolute; inset:0; overflow:hidden; background:var(--paper); }
+  #stage::before { content:""; position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle, rgba(17,16,13,.22) 1px, transparent 1.4px); background-size:4px 4px; opacity:.20; mix-blend-mode:multiply; }
+  #stage::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg, rgba(17,16,13,.055) 0 1px, transparent 1px 3px); opacity:.55; mix-blend-mode:multiply; }
+  .eyebrow { position:absolute; left:84px; top:62px; right:84px; display:flex; justify-content:space-between; font-size:13px; letter-spacing:.18em; text-transform:uppercase; }
+  .eyebrow b { color:var(--verm); }
+  .igni { position:absolute; left:78px; top:234px; font-family:'Playfair',serif; font-weight:900; font-size:320px; line-height:.74; letter-spacing:-.07em; border-bottom:12px solid var(--cobalt); padding-bottom:16px; }
+  .sub { position:absolute; left:88px; top:700px; font-family:'Anton',sans-serif; font-size:32px; letter-spacing:.16em; text-transform:uppercase; }
+  .sub em { font-style:normal; color:var(--verm); }
+  .url { position:absolute; left:88px; bottom:82px; font-size:20px; letter-spacing:.03em; border-bottom:3px solid var(--verm); padding-bottom:6px; }
+  .music { position:absolute; left:88px; bottom:42px; font-size:9px; letter-spacing:.1em; color:rgba(17,16,13,.5); text-transform:uppercase; }
+  .meta { position:absolute; right:88px; bottom:82px; text-align:right; font-size:12px; line-height:18px; letter-spacing:.12em; text-transform:uppercase; color:rgba(17,16,13,.64); }
+  .cover { position:absolute; right:74px; top:190px; width:840px; height:472px; border:3px solid var(--ink); box-shadow:16px 18px 0 rgba(27,77,255,.28); overflow:hidden; }
+  .cover img { width:100%; height:100%; object-fit:cover; display:block; }
+  .seal { position:absolute; right:96px; top:118px; width:110px; height:110px; border:3px solid var(--verm); border-radius:50%; display:flex; align-items:center; justify-content:center; text-align:center; font-family:'Anton',sans-serif; font-size:17px; line-height:1.05; letter-spacing:.08em; text-transform:uppercase; color:#7a1d14; transform:rotate(-12deg); opacity:.9; }
+  .fade { position:absolute; inset:0; background:#050505; opacity:1; pointer-events:none; }
+  .line { position:absolute; left:88px; right:88px; bottom:150px; height:3px; background:var(--ink); }
+</style>
+<script>
+  window.__render = function (t) {
+    const clamp = v => Math.max(0, Math.min(1, v));
+    const ease = p => 1 - Math.pow(1 - p, 3);
+    const p = ease(clamp(t / 1.2));
+    const out = clamp((8.0 - t) / 0.7);
+    document.getElementById('stage').style.transform = `scale(${1.005 + 0.012 * clamp(t / 8)})`;
+    document.querySelector('.igni').style.opacity = p;
+    document.querySelector('.igni').style.transform = `translateY(${(1 - p) * 50}px)`;
+    document.querySelectorAll('.sub,.url,.meta,.cover,.seal,.line').forEach(el => {
+      el.style.opacity = p;
+      el.style.transform = `translateY(${(1 - p) * 24}px)`;
+    });
+    document.querySelector('.fade').style.opacity = Math.max(1 - p, 1 - out);
+  };
+  window.__filmReady = false;
+  window.__startFilm = function () {
+    const started = performance.now();
+    function frame() {
+      const t = (performance.now() - started) / 1000;
+      window.__render(t);
+      if (t < 8.2) requestAnimationFrame(frame);
+    }
+    window.__render(0);
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('load', async () => {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await Promise.all([...document.images].map(img => img.decode().catch(() => {})));
+    window.__render(0);
+    window.__filmReady = true;
+  });
+</script>
+</head>
+<body>
+  <div id="stage">
+    <div class="eyebrow"><span>A Hermes plugin</span><span><b>vol. 0.3</b> / 2026</span></div>
+    <div class="igni">IGNI</div>
+    <div class="sub">A card game at the <em>sign of fire</em></div>
+    <div class="cover"><img src="../docs/cover.png" alt=""></div>
+    <div class="seal">1<br>player</div>
+    <div class="line"></div>
+    <div class="url">github.com/LangerSword/hermes-igni</div>
+    <div class="music">Music: Achaidh Cheide / Kevin MacLeod / CC BY 4.0</div>
+    <div class="meta">gwent / arena<br>one agent / no dice</div>
+    <div class="fade"></div>
+  </div>
+</body>
+</html>

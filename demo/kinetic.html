@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Igni demo</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton-Regular.ttf'); }
+  @font-face { font-family: 'Playfair'; src: url('../assets/fonts/PlayfairDisplay.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Regular.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Bold.ttf'); font-weight: 700; }
+
+  :root {
+    --ink: #11100d;
+    --paper: #e7dcc2;
+    --cobalt: #1b4dff;
+    --verm: #c8452f;
+    --acid: #d8c34a;
+    --jade: #1e7a5a;
+    --night: #090a0c;
+    --cream: #f4ead2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--night); }
+  body { font-family: 'Plex', monospace; color: var(--ink); }
+  #stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--paper);
+    transform-origin: 50% 50%;
+  }
+  #stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(17,16,13,.22) 1px, transparent 1.4px);
+    background-size: 4px 4px;
+    opacity: .20;
+    mix-blend-mode: multiply;
+  }
+  #stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(17,16,13,.055) 0 1px, transparent 1px 3px);
+    opacity: .55;
+    mix-blend-mode: multiply;
+  }
+  #grain {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    opacity: .18;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/></svg>");
+  }
+  .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
+  .mono { font-family: 'Plex', monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .small { font-size: 14px; line-height: 20px; }
+  .tiny { font-size: 11px; line-height: 16px; letter-spacing: .16em; }
+  .rule { height: 3px; background: var(--ink); }
+
+  /* scene 1 */
+  #s1 { padding: 62px 86px; }
+  .eyebrow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; letter-spacing: .18em; }
+  .eyebrow b { color: var(--verm); }
+  .igni {
+    position: absolute;
+    left: 80px;
+    top: 264px;
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 330px;
+    line-height: .74;
+    letter-spacing: -.07em;
+    color: var(--ink);
+    border-bottom: 12px solid var(--cobalt);
+    padding-bottom: 16px;
+    white-space: nowrap;
+  }
+  .igni span { display: inline-block; will-change: transform, opacity; }
+  .s1-sub {
+    position: absolute;
+    left: 92px;
+    top: 765px;
+    font-family: 'Anton', sans-serif;
+    font-size: 34px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .s1-sub em { font-style: normal; color: var(--verm); }
+  .s1-note { position: absolute; right: 88px; bottom: 78px; text-align: right; font-size: 12px; line-height: 18px; color: rgba(17,16,13,.62); }
+  .seal {
+    position: absolute;
+    right: 92px;
+    top: 168px;
+    width: 118px;
+    height: 118px;
+    border: 3px solid var(--verm);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Anton', sans-serif;
+    font-size: 17px;
+    line-height: 1.05;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #7a1d14;
+    transform: rotate(-12deg);
+    opacity: .9;
+  }
+  .s1-card {
+    position: absolute;
+    right: 86px;
+    bottom: 92px;
+    width: 210px;
+    height: 290px;
+    border: 2px solid var(--ink);
+    background: #f1e7cf;
+    box-shadow: 9px 11px 0 rgba(17,16,13,.18);
+    transform: rotate(7deg);
+    padding: 8px;
+  }
+  .s1-card img { width: 100%; height: 205px; object-fit: cover; image-rendering: pixelated; border: 2px solid var(--ink); }
+  .s1-card .cn { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding-top: 5px; }
+
+  /* scene 2 */
+  #s2 { background: var(--night); color: var(--cream); }
+  #s2 .copy { position: absolute; left: 86px; top: 118px; width: 760px; }
+  #s2 .kicker { color: var(--acid); font-size: 13px; letter-spacing: .2em; }
+  #s2 h2 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 118px;
+    line-height: .82;
+    letter-spacing: -.045em;
+    margin: 18px 0 26px;
+    color: var(--cream);
+  }
+  #s2 h2 em { font-style: normal; color: var(--acid); }
+  #s2 .body { color: rgba(244,234,210,.72); font-size: 17px; line-height: 26px; max-width: 520px; }
+  .cover-frame {
+    position: absolute;
+    right: 78px;
+    top: 118px;
+    width: 900px;
+    height: 506px;
+    border: 3px solid var(--cobalt);
+    box-shadow: 16px 18px 0 rgba(200,69,47,.35);
+    overflow: hidden;
+    background: #111;
+  }
+  .cover-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #s2 .foot { position: absolute; left: 86px; bottom: 78px; color: rgba(244,234,210,.52); }
+
+  /* scene 3 */
+  #s3 { padding: 64px 86px; }
+  #s3 h2 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 202px;
+    line-height: .78;
+    letter-spacing: -.055em;
+    margin: 0 0 14px -6px;
+    color: var(--ink);
+  }
+  #s3 .cols { display: flex; gap: 52px; margin-top: 8px; }
+  .mode { width: 330px; border-top: 4px solid var(--ink); padding-top: 12px; }
+  .mode .m { font-family: 'Anton', sans-serif; font-size: 48px; letter-spacing: .06em; text-transform: uppercase; }
+  .mode .d { font-size: 15px; line-height: 22px; color: rgba(17,16,13,.68); margin-top: 8px; }
+  .mode .n { font-family: 'Playfair', serif; font-size: 58px; font-weight: 900; color: var(--cobalt); line-height: 1; margin-top: 10px; }
+  .mode.a .m { color: var(--verm); }
+  .mode.a .n { color: var(--verm); }
+  .fan { position: absolute; right: 70px; bottom: 90px; width: 700px; height: 600px; }
+  .pcard {
+    position: absolute;
+    width: 240px;
+    height: 330px;
+    background: #f1e7cf;
+    border: 3px solid var(--ink);
+    box-shadow: 10px 12px 0 rgba(17,16,13,.18);
+    padding: 8px;
+    will-change: transform, opacity;
+  }
+  .pcard img { width: 100%; height: 238px; object-fit: cover; image-rendering: pixelated; border: 2px solid var(--ink); }
+  .pcard .cn { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding-top: 6px; }
+  .pcard .cs { font-family: 'Anton', sans-serif; font-size: 28px; line-height: 1; padding-top: 4px; color: var(--cobalt); }
+  .pc1 { left: 0; bottom: 54px; border-color: var(--cobalt); transform: rotate(-9deg); }
+  .pc2 { left: 228px; bottom: 110px; border-color: var(--verm); z-index: 3; transform: rotate(1deg); }
+  .pc3 { left: 456px; bottom: 44px; border-color: var(--jade); transform: rotate(9deg); }
+  .pc2 .cs { color: var(--verm); }
+  .pc3 .cs { color: var(--jade); }
+
+  /* scene 4 */
+  #s4 { background: var(--night); color: var(--cream); padding: 74px 86px; }
+  #s4 .kicker { color: var(--verm); font-size: 13px; letter-spacing: .2em; }
+  #s4 h2 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 150px;
+    line-height: .8;
+    letter-spacing: -.05em;
+    margin: 16px 0 22px;
+    color: var(--cream);
+  }
+  #s4 h2 em { font-style: normal; color: var(--cobalt); }
+  #s4 .body { max-width: 600px; font-size: 19px; line-height: 29px; color: rgba(244,234,210,.72); }
+  #s4 .body b { color: var(--acid); font-weight: 700; }
+  .board-frame {
+    position: absolute;
+    right: 76px;
+    top: 116px;
+    width: 880px;
+    height: 640px;
+    border: 3px solid var(--acid);
+    box-shadow: -14px 16px 0 rgba(27,77,255,.42);
+    overflow: hidden;
+    background: #111;
+  }
+  .board-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+  .redact {
+    position: absolute;
+    right: 88px;
+    bottom: 64px;
+    border: 2px solid var(--verm);
+    color: var(--verm);
+    font-family: 'Anton', sans-serif;
+    font-size: 21px;
+    letter-spacing: .08em;
+    padding: 7px 12px;
+    transform: rotate(-4deg);
+    background: rgba(9,10,12,.7);
+  }
+
+  /* scene 5 */
+  #s5 { padding: 74px 86px; }
+  #s5 .kicker { color: var(--verm); font-size: 13px; letter-spacing: .2em; }
+  #s5 h2 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 126px;
+    line-height: .84;
+    letter-spacing: -.045em;
+    margin: 12px 0 22px;
+    color: var(--ink);
+  }
+  #s5 h2 em { font-style: normal; color: var(--cobalt); }
+  .code {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Plex', monospace;
+    font-size: 24px;
+    letter-spacing: .02em;
+    padding: 14px 20px;
+    margin-top: 8px;
+  }
+  #s5 .triad { position: absolute; right: 78px; bottom: 88px; display: flex; gap: 12px; }
+  #s5 .triad img { width: 210px; height: 210px; object-fit: cover; image-rendering: pixelated; border: 3px solid var(--ink); background: #111; }
+
+  /* scene 6 */
+  #s6 { padding: 76px 86px; }
+  #s6 .kicker { color: var(--cobalt); font-size: 13px; letter-spacing: .2em; }
+  #s6 h2 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 190px;
+    line-height: .82;
+    letter-spacing: -.05em;
+    margin: 24px 0 0;
+    color: var(--ink);
+  }
+  #s6 h2 em { font-style: normal; color: var(--verm); }
+  #s6 .proof { margin-top: 30px; display: flex; gap: 54px; border-top: 3px solid var(--ink); padding-top: 16px; }
+  #s6 .proof b { display: block; font-family: 'Anton', sans-serif; font-size: 44px; letter-spacing: .04em; }
+  #s6 .proof span { font-size: 12px; letter-spacing: .14em; color: rgba(17,16,13,.62); }
+  #s6 .end-line { position: absolute; left: 86px; bottom: 76px; font-family: 'Anton', sans-serif; font-size: 38px; letter-spacing: .08em; text-transform: uppercase; }
+  #s6 .end-line b { color: var(--cobalt); }
+  #blackout { position: absolute; inset: 0; background: #050505; opacity: 0; pointer-events: none; }
+</style>
+<script>
+  window.__render = function (t) {
+    const clamp = v => Math.max(0, Math.min(1, v));
+    const ease = p => 1 - Math.pow(1 - p, 3);
+    const scenes = [...document.querySelectorAll('.scene')];
+    scenes.forEach((el, idx) => {
+      const a = +el.dataset.a, b = +el.dataset.b;
+      const pin = clamp((t - a) / 0.48);
+      const pout = clamp((b - t) / 0.48);
+      const op = Math.min(pin, pout);
+      el.style.opacity = op;
+      el.style.visibility = op > 0.001 ? 'visible' : 'hidden';
+    });
+
+    // Slow whole-film push.
+    const stage = document.getElementById('stage');
+    stage.style.transform = `scale(${1.005 + 0.012 * clamp(t / 27)})`;
+
+    // Scene 1: letters rise in.
+    document.querySelectorAll('.igni span').forEach((span, i) => {
+      const p = ease(clamp((t - 0.25 - i * 0.08) / 0.55));
+      span.style.opacity = p;
+      span.style.transform = `translateY(${(1 - p) * 68}px)`;
+    });
+    const seal = document.querySelector('.seal');
+    if (seal) seal.style.transform = `rotate(${-12 - (t - 1.2) * 0.18}deg)`;
+
+    // Scene 2: cover pushes in.
+    const cover = document.querySelector('.cover-frame img');
+    if (cover) cover.style.transform = `scale(${1.02 + 0.045 * clamp((t - 4.2) / 4.2)})`;
+
+    // Scene 3: fan cards settle.
+    ['pc1', 'pc2', 'pc3'].forEach((cls, i) => {
+      const el = document.querySelector('.' + cls);
+      if (!el) return;
+      const base = [-9, 1, 9][i];
+      const p = ease(clamp((t - 8.6 - i * 0.09) / 0.52));
+      el.style.opacity = p;
+      el.style.transform = `rotate(${base + (1 - p) * (i - 1) * 14}deg) translateY(${(1 - p) * 110}px)`;
+    });
+
+    // Scene 4: board drifts.
+    const board = document.querySelector('.board-frame img');
+    if (board) board.style.transform = `scale(${1.01 + 0.03 * clamp((t - 13.2) / 4.8)}) translateX(${-12 * clamp((t - 13.2) / 4.8)}px)`;
+
+    // Scene 6: numbers push.
+    const proof = document.querySelector('#s6 .proof');
+    if (proof) proof.style.transform = `translateY(${(1 - ease(clamp((t - 22.4) / 0.55))) * 26}px)`;
+
+    // Exit to black before the UI.
+    const black = document.getElementById('blackout');
+    black.style.opacity = clamp((t - 26.35) / 0.65);
+  };
+
+  window.__filmReady = false;
+  window.__startFilm = function () {
+    const started = performance.now();
+    function frame() {
+      const t = (performance.now() - started) / 1000;
+      window.__render(t);
+      if (t < 27.2) requestAnimationFrame(frame);
+    }
+    window.__render(0);
+    requestAnimationFrame(frame);
+  };
+
+  window.addEventListener('load', async () => {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const images = [...document.images];
+    await Promise.all(images.map(img => img.decode().catch(() => {})));
+    window.__render(0);
+    window.__filmReady = true;
+  });
+</script>
+</head>
+<body>
+  <div id="stage">
+    <div id="grain"></div>
+
+    <section class="scene" id="s1" data-a="0" data-b="4.2">
+      <div class="eyebrow mono"><span>A Hermes plugin</span><span>vol. 0.3 / 2026</span></div>
+      <div class="igni"><span>I</span><span>G</span><span>N</span><span>I</span></div>
+      <div class="seal">1<br>player</div>
+      <div class="s1-sub">A card game at the <em>sign of fire</em></div>
+      <div class="s1-note mono small">gwent / arena<br>one agent / no dice</div>
+      <div class="s1-card"><img src="../art/gwent_hero_ash.webp" alt=""><div class="cn">Geralt of Rivia / 15</div></div>
+    </section>
+
+    <section class="scene" id="s2" data-a="4.2" data-b="8.4">
+      <div class="copy">
+        <div class="kicker mono">The table is open</div>
+        <h2>A card game<br>at the sign<br>of <em>fire.</em></h2>
+        <div class="body">Two decks. Hidden hands. A rule engine that says no. Ask Hermes to deal.</div>
+      </div>
+      <div class="cover-frame"><img src="../docs/cover.png" alt=""></div>
+      <div class="foot mono tiny">play it from chat / tui / desktop</div>
+    </section>
+
+    <section class="scene" id="s3" data-a="8.4" data-b="13.2">
+      <div class="kicker mono" style="color:var(--verm);font-size:13px;letter-spacing:.2em">two games / one table</div>
+      <h2>Two games</h2>
+      <div class="cols">
+        <div class="mode"><div class="m">Gwent</div><div class="d">Rows, weather, spies, horns, scorch. Best of three.</div><div class="n">01</div></div>
+        <div class="mode a"><div class="m">Arena</div><div class="d">30 health, mana, taunts, charge, divine shields.</div><div class="n">02</div></div>
+      </div>
+      <div class="fan">
+        <div class="pcard pc1"><img src="../art/gwent_hero_ash.webp" alt=""><div class="cn">Geralt / melee hero</div><div class="cs">15</div></div>
+        <div class="pcard pc2"><img src="../art/gwent_hero_lady.webp" alt=""><div class="cn">Philippa / ranged hero</div><div class="cs">10</div></div>
+        <div class="pcard pc3"><img src="../art/gwent_hero_obsidian.webp" alt=""><div class="cn">Letho / melee hero</div><div class="cs">7</div></div>
+      </div>
+    </section>
+
+    <section class="scene" id="s4" data-a="13.2" data-b="18.0">
+      <div class="kicker mono">the boundary</div>
+      <h2>Hidden hands.<br><em>Real rules.</em></h2>
+      <div class="body">The opponent is local and rule-based. It sees its own hand and the public board. <b>Never yours.</b></div>
+      <div class="board-frame"><img src="../docs/desktop.png" alt=""></div>
+      <div class="redact">No peek</div>
+    </section>
+
+    <section class="scene" id="s5" data-a="18.0" data-b="22.2">
+      <div class="kicker mono">the install</div>
+      <h2>No API keys.<br><em>No network.</em></h2>
+      <div class="code">table_new</div>
+      <div class="triad">
+        <img src="../art/gwent_infantry.webp" alt="">
+        <img src="../art/arena_mage.webp" alt="">
+        <img src="../art/spell_bolt.webp" alt="">
+      </div>
+      <div class="mono small" style="position:absolute;left:86px;bottom:86px;color:rgba(17,16,13,.62)">one active table / hidden hand / atomic state</div>
+    </section>
+
+    <section class="scene" id="s6" data-a="22.2" data-b="27.0">
+      <div class="kicker mono">the proof</div>
+      <h2>29 tests.<br><em>40 matches.</em></h2>
+      <div class="proof">
+        <div><b>29</b><span>behaviour tests</span></div>
+        <div><b>40</b><span>self-played matches</span></div>
+        <div><b>0</b><span>hidden cards leaked</span></div>
+      </div>
+      <div class="end-line">the table is <b>open</b></div>
+    </section>
+
+    <div id="blackout"></div>
+  </div>
+</body>
+</html>

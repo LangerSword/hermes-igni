@@ -1,0 +1,5 @@
+drawtext=fontfile=/home/lakshaya/projects/hermes-igni/assets/fonts/IBMPlexMono-Bold.ttf:text='IGNI / DESKTOP TABLE':x=70:y=382:fontsize=11:fontcolor=0x8F8878:enable='between(t,27.0,52.0)',
+drawbox=x=70:y=410:w=190:h=2:color=0x1B4DFF@0.85:t=fill:enable='between(t,27.0,52.0)',
+drawtext=fontfile=/home/lakshaya/projects/hermes-igni/assets/fonts/IBMPlexMono-Bold.ttf:text='01 / CLICK A CARD':x=70:y=434:fontsize=18:fontcolor=0xECE6D9:enable='between(t,27.5,33.4)',
+drawtext=fontfile=/home/lakshaya/projects/hermes-igni/assets/fonts/IBMPlexMono-Bold.ttf:text='02 / THE ENGINE ANSWERS':x=70:y=434:fontsize=18:fontcolor=0xECE6D9:enable='between(t,34.0,41.2)',
+drawtext=fontfile=/home/lakshaya/projects/hermes-igni/assets/fonts/IBMPlexMono-Bold.ttf:text='03 / TWO GAMES / ONE TABLE':x=70:y=434:fontsize=18:fontcolor=0xECE6D9:enable='between(t,42.0,50.0)'

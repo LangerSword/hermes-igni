@@ -176,7 +176,7 @@ const S = {
   logLine: { fontSize: '11px', lineHeight: '15px', color: C.text4 }
 }
 
-function Tile({ title, meta, note, selected, onClick, dim, accent, art, artHeight = 54 }) {
+function Tile({ title, meta, note, selected, onClick, dim, accent, art, artHeight = 54, wrapName = false }) {
   const Comp = onClick ? 'button' : 'div'
   return jsxs(Comp, {
     type: onClick ? 'button' : undefined,
@@ -189,7 +189,7 @@ function Tile({ title, meta, note, selected, onClick, dim, accent, art, artHeigh
       alignItems: 'flex-start',
       textAlign: 'left',
       padding: '0',
-      minWidth: '96px',
+      minWidth: '100px',
       maxWidth: '158px',
       borderRadius: '0',
       border: `2px solid ${selected ? C.accent : C.stroke}`,
@@ -220,12 +220,15 @@ function Tile({ title, meta, note, selected, onClick, dim, accent, art, artHeigh
       jsx('span', {
         style: {
           fontSize: '11.5px',
-          lineHeight: '15px',
+          lineHeight: '13px',
           fontWeight: 600,
           color: accent ? C.accent : C.text,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          whiteSpace: wrapName ? 'normal' : 'nowrap',
+          display: wrapName ? '-webkit-box' : 'block',
+          WebkitLineClamp: wrapName ? 2 : undefined,
+          WebkitBoxOrient: 'vertical',
           maxWidth: '100%',
           padding: '4px 7px 0'
         },
@@ -789,6 +792,7 @@ function TablePage({ ctx }) {
                       note: handNote(card, mode),
                       art: artFor(card.key),
                       artHeight: 62,
+                      wrapName: true,
                       selected: handSel === card.index,
                       onClick: canAct ? () => onHand(card) : undefined,
                       dim: !canAct,
