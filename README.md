@@ -158,7 +158,7 @@ second. It never includes the opponent's cards.
 The same package ships the desktop half:
 
 ```text
-desktop/plugin.js       full page at /igni, clickable cards, sidebar nav row,
+desktop/plugin.js       full page at /table, clickable cards, sidebar nav row,
                         ⌘K "Igni: open the card table", statusbar chip
 dashboard/plugin_api.py /api/plugins/igni/{state,new,move,rules,art/{key}}
 ```

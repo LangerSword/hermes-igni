@@ -898,7 +898,7 @@ function TableChip() {
   return jsx('button', {
     type: 'button',
     title: 'Open the card table',
-    onClick: () => host.navigate('/igni'),
+    onClick: () => host.navigate('/table'),
     style: {
       display: 'inline-flex',
       alignItems: 'center',
@@ -923,14 +923,14 @@ export default {
     ctx.register({
       id: 'page',
       area: ROUTES_AREA,
-      data: { path: '/igni' },
+      data: { path: '/table' },
       render: () => jsx(TablePage, { ctx })
     })
 
     ctx.register({
       id: 'nav',
       area: SIDEBAR_NAV_AREA,
-      data: { path: '/igni', label: 'Igni', codicon: 'symbol-event' }
+      data: { path: '/table', label: 'Igni', codicon: 'symbol-event' }
     })
 
     ctx.register({
@@ -940,7 +940,7 @@ export default {
         id: 'igni.open',
         label: 'Igni: open the card table',
         keywords: ['table', 'cards', 'gwent', 'arena', 'hearthstone', 'game'],
-        run: () => host.navigate('/igni')
+        run: () => host.navigate('/table')
       }
     })
 
