@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+  :root {
+    --ui-text-primary: #ece6d9;
+    --ui-text-secondary: #cbc4b4;
+    --ui-text-tertiary: #a49d8d;
+    --ui-text-quaternary: #797367;
+    --ui-stroke-secondary: #3b3831;
+    --ui-bg-quaternary: #181714;
+    --chrome-action-hover: #26241f;
+    --ui-accent: #efb45e;
+    --ui-bg-primary: #0d0c0a;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  html, body { margin: 0; background: #0b0a09; width: 1100px; height: 900px; }
+  #root { width: 1100px; height: 900px; }
+
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client",
+    "@hermes/plugin-sdk": "./sdk-stub.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+  import plugin from '../desktop/plugin.js'
+  import { createRoot } from 'react-dom/client'
+
+  let page = null
+  const ctx = {
+    async rest(path) {
+      const fixture = window.__FIXTURE__
+      if (!fixture) throw new Error('no fixture')
+      if (path.startsWith('/art/')) {
+        const key = decodeURIComponent(path.slice(5))
+        return { data_url: fixture.art[key] }
+      }
+      if (path === '/state') return fixture.state
+      return { ok: false, error: 'harness' }
+    },
+    register(contribution) {
+      if (contribution && contribution.id === 'page') page = contribution
+    }
+  }
+  plugin.register(ctx)
+  if (!page) throw new Error('plugin did not register a page')
+  createRoot(document.getElementById('root')).render(page.render())
+</script>
+</body>
+</html>

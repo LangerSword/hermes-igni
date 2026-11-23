@@ -1,19 +1,21 @@
 # Verification
 
-Run on 2026-11-23 on the author's Arch/Hyprland machine, Hermes Agent v0.23.1.
+Run on 2026-11-24 on the author's Arch/Hyprland machine, Hermes Agent v0.23.1.
 
 ## Engine and tools
 
 ```text
 $ python3 -m unittest discover -s tests -v
-Ran 23 tests in 0.404s
+Ran 29 tests in 0.275s
 OK
 ```
 
 Covers: deck sizes (22/20), weather + horn + hero scoring, spy draw, scorch,
 round ties and match draws, mana/summon/sickness, taunt enforcement, lethal,
-AI end-turn, hidden-hand boundaries in `public_view` / snapshot / tools, tool
-errors as JSON, store round-trip, FastAPI routes, and AI-vs-AI termination.
+AI end-turn, AI pass discipline (a 13-point lead keeps pressure; 17+ with card
+disadvantage banks), hidden-hand boundaries in `public_view` / snapshot / tools,
+tool errors as JSON, widget install, art coverage, store round-trip, FastAPI
+routes (including `/art`), and AI-vs-AI termination.
 
 ```text
 $ python3 smoke_test.py
@@ -52,64 +54,54 @@ $ hermes plugins doctor /home/lakshaya/.hermes/plugins/table
   registrations: 4 tool(s), 0 hook(s)
 ```
 
-## Real agent turn
+## Live plugin
 
-A one-shot Hermes session with the `table` toolset, after `hermes plugins
-enable table`:
-
-```text
-$ hermes -m deepseek/deepseek-v4.1-flash-1017 --provider nous -t table \
-    -z "Use table_state to show the current card table, then stop."
-```
-
-The model called `table_state` and returned the board verbatim, with the
-opponent's `10 hidden card(s)` — no hand leak.
-
-A second turn relayed one user move:
+`hermes plugins enable table` loaded it into the gateway; after the v0.2 code
+changes it was cycled with `disable` + `enable` so the running module matched
+the installed files.
 
 ```text
-$ hermes ... -z "The user's move is: play card 1. Relay exactly that move..."
-Events:
-  You play Poor Infantry (1) to melee.
-  Opponent play Tibor Eggebracht (10) to ranged.
+$ hermes table install-widget
+TUI widget current: /home/lakshaya/.hermes/tui-widgets/table-board.mjs
+Run /table-board in the TUI to open it.
 ```
 
-The opponent answered inside the same `table_play` call, and the board advanced.
+`table_new` also installs the widget on first use (tested idempotent), so a Git
+install does not need the sync script for the scoreboard.
 
-## Desktop app
-
-The app was launched from the packaged build, copied the unified package's
-desktop half to
+A one-shot Hermes session with the `table` toolset called `table_state` and
+returned the board verbatim, with the opponent's `10 hidden card(s)` — no hand
+leak. A previous `table_play` turn relayed `play card 1` and the opponent
+answered inside the same call:
 
 ```text
-~/.hermes/desktop-plugins/table/plugin.js
-~/.hermes/desktop-plugins/table/.hermes-package.json
+You play Poor Infantry (1) to melee.
+Opponent play Tibor Eggebracht (10) to ranged.
 ```
 
-with the expected marker (`package: table`, source
-`.../plugins/table/desktop`). After enabling the desktop half, the app loaded:
+## Art
 
-- sidebar row **Table**
-- ⌘K entry **Table: open the card table**
-- statusbar chip **♠ table**
-- page at **#/table** backed by `/api/plugins/table`
-
-A real move was made through the desktop page: clicked
-**Sigismund Dijkstra** in hand, then **Play**. The backend returned:
-
-```text
-You send Sigismund Dijkstra (4) to the enemy row and draw 2.
-Opponent pass.
-```
-
-and the page updated to opponent score 14 (Tibor 10 + Dijkstra 4), player hand
-10 / deck 10. `hermes table board` from a separate process read the same state,
-proving the writes are shared through the plugin store, not local UI state.
-The screenshot is `docs/desktop.png`.
-
-The desktop half was enabled through the app's own decision store
-(`hermes.desktop.pluginDecisions.v2` → `{"table":true}`); it is
-`defaultEnabled: false` in the package.
+- **Cover:** `cover/cover.html` rendered by `scripts/render_cover.py` to
+  `docs/cover.png` at 1600×900. Newsprint, halftone, cobalt / vermilion / acid
+  inks, registration crosses, coupon and a fanned pixel hand. The type is real
+  Anton / Playfair / IBM Plex Mono, not generated lettering.
+- **Cards:** 21 WebP files in `art/`, each 256×256 and quantized to 24 colours
+  from a 1K generation. The contact sheet is `docs/card-art-grid.png`.
+  `scripts/build_card_art.py` rebuilds them from the raw cache.
+- **API:** `GET /api/plugins/table/art/gwent_infantry` returns `ok=True` with a
+  `data:image/webp;base64,...` payload (tested with FastAPI TestClient).
+  Unknown keys return `ok=False`.
+- **Desktop page:** rendered through the plugin's own SDK harness with a
+  fixture (`test/harness.html` + `scripts/render_ui_harness.py`) at 1100×800.
+  `docs/desktop.png` shows the 8-card hand, both Gwent sides, the pixel art,
+  the scanline panels and the action bar. This also proves the art effect does
+  not crash the page.
+- **Packaged app:** the earlier pre-art version was played end-to-end in the
+  real app (Sigismund Dijkstra → Play; score 14, hand/deck updated, separate
+  `hermes table board` read the same state). The refreshed desktop half is
+  copied and current; the app needs one relaunch/Rescan to load the new UI.
+  The GUI launch was not repeated after the art change because launching the
+  desktop is a user-approved action.
 
 ## TUI
 
@@ -117,5 +109,5 @@ The desktop half was enabled through the app's own decision store
 [tui-parent] 2026-11-23T17:28:03.360Z user widgets registered: table-board
 ```
 
-The ambient scoreboard registered from `~/.hermes/tui-widgets/table-board.mjs`
-and reads the hand-free snapshot at `~/.hermes/table/board.json`.
+The ambient scoreboard reads the hand-free snapshot at
+`~/.hermes/table/board.json`; `table_new` now installs it automatically.

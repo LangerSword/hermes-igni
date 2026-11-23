@@ -206,6 +206,7 @@ def public_view(state: dict) -> dict:
                         "index": index,
                         "name": card["name"],
                         "kind": card.get("kind"),
+                        "key": card.get("key"),
                         "row": card.get("row"),
                         "strength": card.get("strength", 0),
                         "text": card.get("text", ""),
@@ -218,6 +219,7 @@ def public_view(state: dict) -> dict:
                         "index": index,
                         "name": card["name"],
                         "kind": card["kind"],
+                        "key": card.get("key"),
                         "cost": card["cost"],
                         "attack": card.get("attack", 0),
                         "health": card.get("health", 0),
@@ -241,7 +243,7 @@ def public_view(state: dict) -> dict:
                     "rows": {
                         row: [
                             {"name": card["name"], "strength": card.get("strength", 0),
-                             "kind": card.get("kind")}
+                             "kind": card.get("kind"), "key": card.get("key")}
                             for card in pile["rows"][row]
                         ]
                         for row in table_gwent.GWENT_ROWS
@@ -259,6 +261,7 @@ def public_view(state: dict) -> dict:
                         {
                             "index": index,
                             "name": minion["name"],
+                            "key": minion.get("key"),
                             "attack": minion["attack"],
                             "health": minion["health"],
                             "max_health": minion.get("max_health", minion["health"]),

@@ -58,8 +58,14 @@ def handle_slash(raw: str) -> str:
             "/table — show the active table\n"
             "/table rules [gwent|arena] — rules and card pool\n"
             "/table new [gwent|arena] [seed] — deal a new table\n"
+            "/table install-widget — put the TUI scoreboard in place\n"
             "Ask the agent to play: it relays your move through table_play."
         )
+    if cmd in ("install-widget", "widget"):
+        result = table_store.install_widget()
+        if result.get("ok"):
+            return f"TUI widget {result['status']}: {result['path']}\nRun /table-board to open it."
+        return f"TUI widget failed: {result.get('error')}"
     return f"unknown /table command {cmd!r}; try /table help"
 
 
@@ -87,6 +93,9 @@ def setup_cli(parser: argparse.ArgumentParser) -> None:
     play = sub.add_parser("play", help="play a table in this terminal")
     play.add_argument("mode", nargs="?", default="gwent", choices=["gwent", "arena"])
     play.add_argument("--seed", type=int, default=None)
+
+    widget = sub.add_parser("install-widget", help="install the TUI scoreboard")
+    widget.set_defaults(table_command="install-widget")
 
     parser.set_defaults(table_command=None)
 
@@ -231,6 +240,14 @@ def handle_cli(args: Any) -> int:
         return _demo(args.mode, args.seed, args.max_steps)
     if command == "play":
         return _interactive(args.mode, args.seed)
+    if command == "install-widget":
+        result = table_store.install_widget()
+        if result.get("ok"):
+            print(f"TUI widget {result['status']}: {result['path']}")
+            print("Run /table-board in the TUI to open it.")
+            return 0
+        print(result.get("error", "widget install failed"), file=sys.stderr)
+        return 1
     print(f"unknown table command {command!r}", file=sys.stderr)
     return 1
 

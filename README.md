@@ -7,7 +7,9 @@ TUI scoreboard, or from a full desktop page with clickable cards.
 
 No API keys. No network. Standard library only on the engine side.
 
-![Table on the Hermes desktop](docs/desktop.png)
+![Table — a Hermes plugin cover](docs/cover.png)
+
+![Table page with pixel-art cards](docs/desktop.png)
 
 
 ```text
@@ -65,8 +67,25 @@ never leaves the process.
 - Battlecries: draw, heal, or damage all enemy minions.
 - Empty deck deals rising fatigue damage.
 
-Both decks and every card stat are original to this plugin. The rulesets are
-inspired by the genres, not ports of a commercial game.
+The rules engines and illustrations are original. Gwent mode is an unaffiliated
+fan homage to the row-war mini-game; its character names belong to their
+owners. Arena mode is original. No assets from a commercial game are used.
+
+## Art
+
+- **Cover:** a recent-Nous-style print artifact — newsprint, halftone, cobalt /
+  vermilion / acid inks, registration marks, a mail-order coupon and a fanned
+  pixel hand. Source in `cover/cover.html`; render with
+  `python3 scripts/render_cover.py`.
+- **Cards:** 256 px, 24-colour pure pixel art in `art/`. Every card key maps to
+  an archetype print; the frame, title and stats keep each card distinct. Rebuild
+  with `python3 scripts/build_card_art.py`; contact sheet in
+  `docs/card-art-grid.png`.
+- **Desktop:** cards render with `image-rendering: pixelated`, a hard 2 px frame
+  and a scanline panel. The TUI stays typographic — the board is the art there.
+
+![Twenty-one pixel card archetypes](docs/card-art-grid.png)
+
 
 ## Play from chat
 
@@ -102,6 +121,7 @@ exactly, and never reveals the hidden hand.
 /table                     show the active board
 /table rules [mode]        rules + the full card pool
 /table new [gwent|arena] [seed]
+/table install-widget      put the TUI scoreboard in place
 ```
 
 ## Terminal
@@ -121,8 +141,9 @@ entry point above.
 
 ## TUI
 
-`tui/table-board.mjs` is an ambient scoreboard. `scripts/sync_plugin.py` copies
-it to `$HERMES_HOME/tui-widgets/`; the TUI hot-loads it.
+`tui/table-board.mjs` is an ambient scoreboard. `table_new` installs it into
+`$HERMES_HOME/tui-widgets/` on first use; `hermes table install-widget` and
+`/table install-widget` do the same by hand.
 
 ```text
 /table-board
@@ -138,7 +159,7 @@ The same package ships the desktop half:
 ```text
 desktop/plugin.js       full page at /table, clickable cards, sidebar nav row,
                         ⌘K "Table: open the card table", statusbar chip
-dashboard/plugin_api.py /api/plugins/table/{state,new,move,rules}
+dashboard/plugin_api.py /api/plugins/table/{state,new,move,rules,art/{key}}
 ```
 
 The page plays both games without the chat agent: click a card, pick a row or
@@ -156,6 +177,7 @@ From this checkout:
 ```bash
 python3 scripts/sync_plugin.py
 hermes plugins enable table
+hermes table install-widget
 ```
 
 Then start a new session (tools and the prompt section land next session; hooks
@@ -168,7 +190,7 @@ installs the same folder.
 ## Verify
 
 ```bash
-python3 -m unittest discover -s tests -v   # 23 behaviour tests
+python3 -m unittest discover -s tests -v   # 29 behaviour tests
 python3 smoke_test.py --show               # both modes, 20 seeds, plus a board
 python3 smoke_load.py                      # real register() + tool dispatch
 hermes plugins validate .                  # manifest + capability probe
@@ -176,27 +198,32 @@ hermes plugins validate .                  # manifest + capability probe
 
 What the tests prove: deck sizes, weather/horn/hero scoring, spy draw, scorch,
 round ties and match draws, mana/summon/taunt/lethal, AI turns finishing,
-hidden-hand boundaries in `public_view`/snapshot/tools, tool errors as JSON,
-persistence, backend routes, and AI-vs-AI termination on every seed.
+AI pass discipline, hidden-hand boundaries in `public_view`/snapshot/tools,
+tool errors as JSON, widget install, art coverage, persistence, backend routes,
+and AI-vs-AI termination on every seed.
 
 ## Layout
 
 ```text
 __init__.py          register(): tools, /table, hermes table, prompt section
-table_cards.py       original card pools, deck builders, rules text
+table_cards.py       original card pools, deck builders, rules text, art map
 table_common.py      GameError + side helpers
 table_gwent.py       row war: scoring, weather, spies, horns, scorch, AI
 table_arena.py       mana duel: combat, taunts, spells, battlecries, AI
 table_render.py      chat board, structured public view, widget snapshot
 table_engine.py      mode dispatch + the opponent's reply inside one call
-table_store.py       profile-scoped state + atomic widget snapshot
+table_store.py       profile-scoped state, atomic snapshot, widget install
 table_tools.py       the four tool specs and handlers
 table_cli.py         /table, hermes table, standalone CLI, interactive play
 tui/table-board.mjs  ambient TUI scoreboard
-desktop/plugin.js    desktop page
-dashboard/           FastAPI router for the desktop page
+desktop/plugin.js    desktop page: pixel cards, click-to-play, /art cache
+dashboard/           FastAPI router for state, moves and card art
+art/                 256px / 24-colour pixel card art (WebP)
+cover/cover.html     the print-artifact cover source
+assets/fonts/        Anton / Playfair / IBM Plex / Press Start / VT323
+docs/                cover, desktop screenshot, card contact sheet
 tests/               stdlib unittest
-scripts/sync_plugin.py
+scripts/             sync, art build, cover render, desktop probe
 ```
 
 State lives in the plugin data directory (one active table per profile) and in

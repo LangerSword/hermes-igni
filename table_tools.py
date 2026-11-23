@@ -48,6 +48,13 @@ def h_new(args: dict, **_: Any) -> str:
     except GameError as exc:
         return _error(str(exc))
     table_store.save(state)
+    widget = table_store.install_widget()
+    message = (
+        "Table set. The user is the player — ask for their move. "
+        "Relay exactly what they say through table_play; do not move for them."
+    )
+    if widget.get("ok"):
+        message += " TUI scoreboard ready: /table-board."
     return _json(
         {
             "ok": True,
@@ -55,10 +62,8 @@ def h_new(args: dict, **_: Any) -> str:
             "mode": state["mode"],
             "seed": state["seed"],
             "board": render(state),
-            "message": (
-                "Table set. The user is the player — ask for their move. "
-                "Relay exactly what they say through table_play; do not move for them."
-            ),
+            "tui_widget": widget,
+            "message": message,
         }
     )
 

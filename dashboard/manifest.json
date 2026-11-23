@@ -3,6 +3,6 @@
   "label": "Table",
   "description": "Card games: Gwent-style row warfare and an Arena mana duel, played against a hidden-hand opponent.",
   "icon": "symbol-event",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "api": "plugin_api.py"
 }

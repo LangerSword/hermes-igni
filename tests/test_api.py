@@ -67,6 +67,14 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertIn("ARENA", payload["rules"])
 
+    def test_art(self):
+        payload = client.get("/api/plugins/table/art/gwent_infantry").json()
+        self.assertTrue(payload["ok"], payload)
+        self.assertTrue(payload["data_url"].startswith("data:image/webp;base64,"))
+        self.assertGreater(len(payload["data_url"]), 1000)
+        missing = client.get("/api/plugins/table/art/not_a_card").json()
+        self.assertFalse(missing["ok"])
+
 
 if __name__ == "__main__":
     unittest.main()

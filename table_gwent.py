@@ -420,8 +420,17 @@ def ai_action(state: dict, side: str = "opponent") -> dict:
             action["row"] = pick["row"]
         return action
 
-    # Both still holding cards: bank a big lead when the trade is even.
-    if me - you >= 12 and len(hand) <= len(state["sides"][other(side)]["hand"]):
+    # Both still holding cards: bank a lead only when it is genuinely safe.
+    # Passing on a 13-point lead with a full hand invites the exact Geralt/Horn
+    # comeback this AI used to lose to; keep pressure until the lead is large or
+    # the opponent is out of cards.
+    lead = me - you
+    their_hand = len(state["sides"][other(side)]["hand"])
+    if lead >= 18:
+        return {"action": "pass"}
+    if lead >= 16 and len(hand) < their_hand:
+        return {"action": "pass"}
+    if lead >= 8 and their_hand <= 2:
         return {"action": "pass"}
 
     pick = max(candidates, key=lambda c: (c["swing"], -c["index"]))

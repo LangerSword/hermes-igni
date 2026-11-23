@@ -206,6 +206,76 @@ def build_arena_deck(deck_name: str) -> list[dict]:
     return deck
 
 
+# Card key -> pixel-art stem in art/<stem>.webp. Several cards share an
+# archetype print; the frame, title and stats keep each card distinct.
+ART_BY_KEY = {
+    # Gwent: Ashen Crown
+    "blue_stripes": "gwent_infantry",
+    "redanian_elite": "gwent_infantry",
+    "poor_infantry": "gwent_infantry",
+    "aedirnian_mauler": "gwent_infantry",
+    "crinfrid_reavers": "gwent_archer",
+    "ballista": "gwent_siege",
+    "catapult": "gwent_siege",
+    "trebuchet": "gwent_siege",
+    "geralt": "gwent_hero_ash",
+    "philippa": "gwent_hero_lady",
+    "vernon": "gwent_hero_ash",
+    "dijkstra": "gwent_spy",
+    # Gwent: Obsidian Court
+    "impera": "gwent_infantry",
+    "alba_pikemen": "gwent_infantry",
+    "nausicaa": "gwent_infantry",
+    "black_archer": "gwent_archer",
+    "etolian": "gwent_archer",
+    "mangonel": "gwent_siege",
+    "scorpion": "gwent_siege",
+    "letho": "gwent_hero_obsidian",
+    "tibor": "gwent_hero_obsidian",
+    "menno": "gwent_hero_obsidian",
+    "shilard": "gwent_spy",
+    # Gwent specials
+    "horn": "gwent_horn",
+    "frost": "weather_frost",
+    "fog": "weather_fog",
+    "rain": "weather_rain",
+    "clear": "weather_clear",
+    "scorch": "gwent_scorch",
+    # Arena: Vanguard
+    "emberling": "arena_duelist",
+    "shieldbearer": "arena_guard",
+    "ash_hound": "arena_duelist",
+    "cinder_guard": "arena_guard",
+    "blade_dancer": "arena_duelist",
+    "sunspear": "arena_duelist",
+    "bulwark": "arena_guard",
+    "pyre_mage": "arena_mage",
+    "dawnbreaker": "arena_giant",
+    "colossus": "arena_giant",
+    "ember_bolt": "spell_bolt",
+    "reinforce": "spell_draw",
+    "sunrise": "spell_heal",
+    "cleansing_flame": "gwent_scorch",
+    # Arena: Syndicate
+    "grunt": "arena_duelist",
+    "nightblade": "arena_duelist",
+    "boneguard": "arena_guard",
+    "cutthroat": "arena_duelist",
+    "warden": "arena_guard",
+    "hexer": "arena_mage",
+    "ravager": "arena_duelist",
+    "bloodmoon_priest": "arena_mage",
+    "ironjaw": "arena_guard",
+    "dreadnought": "arena_giant",
+    "shadow_bolt": "spell_bolt",
+    "dark_pact": "spell_draw",
+    "blood_rite": "spell_heal",
+    "plague": "gwent_scorch",
+}
+
+ART_BACK = "card_back"
+
+
 GWENT_RULES = """\
 GWENT — best of three, one card per turn.
 

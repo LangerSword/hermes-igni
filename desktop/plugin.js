@@ -20,10 +20,15 @@ import {
   useQuery
 } from '@hermes/plugin-sdk'
 import { jsx, jsxs } from 'react/jsx-runtime'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const ID = 'table'
 const ROWS = ['melee', 'ranged', 'siege']
+
+// Pixel-art cards are fetched once per key from /api/plugins/table/art/<key>
+// and cached for the life of the window. The map is mutated, so artVersion
+// forces a repaint when new keys land.
+const artCache = new Map()
 
 const C = {
   text: 'var(--ui-text-primary)',
@@ -48,7 +53,15 @@ const S = {
     color: C.text
   },
   header: { display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' },
-  title: { fontSize: '21px', fontWeight: 600, letterSpacing: '-0.02em', color: C.text },
+  title: {
+    fontSize: '20px',
+    fontWeight: 700,
+    letterSpacing: '0.22em',
+    textTransform: 'uppercase',
+    color: C.text,
+    fontFamily: 'var(--font-mono, monospace)'
+  },
+  subtitle: { fontSize: '11.5px', color: C.text3 },
   subtle: { fontSize: '11.5px', color: C.text3 },
   status: { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '12px', color: C.text2 },
   board: {
@@ -58,13 +71,15 @@ const S = {
     alignItems: 'stretch'
   },
   panel: {
-    border: `1px solid ${C.stroke}`,
-    borderRadius: '5px',
+    border: `2px solid ${C.stroke}`,
+    borderRadius: '0',
     padding: '12px 14px',
     display: 'flex',
     flexDirection: 'column',
     gap: '9px',
-    minWidth: 0
+    minWidth: 0,
+    backgroundImage:
+      'repeating-linear-gradient(0deg, rgba(127,127,127,0.07) 0px, rgba(127,127,127,0.07) 1px, transparent 1px, transparent 4px)'
   },
   rowLabel: {
     fontSize: '10.5px',
@@ -161,7 +176,7 @@ const S = {
   logLine: { fontSize: '11px', lineHeight: '15px', color: C.text4 }
 }
 
-function Tile({ title, meta, note, selected, onClick, dim, accent }) {
+function Tile({ title, meta, note, selected, onClick, dim, accent, art, artHeight = 54 }) {
   const Comp = onClick ? 'button' : 'div'
   return jsxs(Comp, {
     type: onClick ? 'button' : undefined,
@@ -173,18 +188,35 @@ function Tile({ title, meta, note, selected, onClick, dim, accent }) {
       gap: '1px',
       alignItems: 'flex-start',
       textAlign: 'left',
-      padding: '6px 8px',
-      minWidth: '88px',
-      maxWidth: '170px',
-      borderRadius: '3px',
-      border: `1px solid ${selected ? C.accent : C.stroke}`,
+      padding: '0',
+      minWidth: '96px',
+      maxWidth: '158px',
+      borderRadius: '0',
+      border: `2px solid ${selected ? C.accent : C.stroke}`,
       background: selected ? C.hover : C.panel,
       color: C.text,
       cursor: onClick ? 'pointer' : 'default',
       opacity: dim ? 0.45 : 1,
-      font: 'inherit'
+      font: 'inherit',
+      overflow: 'hidden'
     },
     children: [
+      art
+        ? jsx('img', {
+            src: art,
+            alt: '',
+            draggable: false,
+            style: {
+              display: 'block',
+              width: '100%',
+              height: `${artHeight}px`,
+              objectFit: 'cover',
+              imageRendering: 'pixelated',
+              borderBottom: `1px solid ${C.stroke}`,
+              background: C.panel
+            }
+          })
+        : null,
       jsx('span', {
         style: {
           fontSize: '11.5px',
@@ -194,7 +226,8 @@ function Tile({ title, meta, note, selected, onClick, dim, accent }) {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
-          maxWidth: '100%'
+          maxWidth: '100%',
+          padding: '4px 7px 0'
         },
         children: title
       }),
@@ -204,14 +237,24 @@ function Tile({ title, meta, note, selected, onClick, dim, accent }) {
               fontSize: '10.5px',
               lineHeight: '14px',
               fontFamily: 'var(--font-mono, monospace)',
-              color: C.text3
+              color: C.text3,
+              padding: '0 7px'
             },
             children: meta
           })
         : null,
       note
         ? jsx('span', {
-            style: { fontSize: '9.5px', lineHeight: '13px', color: C.text4 },
+            style: {
+              fontSize: '9.5px',
+              lineHeight: '13px',
+              color: C.text4,
+              padding: '0 7px 5px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%'
+            },
             children: note
           })
         : null
@@ -219,7 +262,7 @@ function Tile({ title, meta, note, selected, onClick, dim, accent }) {
   })
 }
 
-function GwentSide({ side, view }) {
+function GwentSide({ side, view, artFor }) {
   const weatherRows = new Set((view.weather || []).map(w => w.row))
   return jsxs('div', {
     style: S.panel,
@@ -261,7 +304,9 @@ function GwentSide({ side, view }) {
                         {
                           title: card.name,
                           meta: String(card.strength),
-                          accent: card.kind === 'hero'
+                          accent: card.kind === 'hero',
+                          art: artFor(card.key),
+                          artHeight: 42
                         },
                         `${row}-${index}`
                       )
@@ -281,7 +326,7 @@ function GwentSide({ side, view }) {
   })
 }
 
-function ArenaSide({ side, view, opponent, selection, target, onOwnMinion, onEnemyMinion, onEnemyHero }) {
+function ArenaSide({ side, view, opponent, selection, target, onOwnMinion, onEnemyMinion, onEnemyHero, artFor }) {
   const spellSelected =
     selection != null && selection.kind === 'spell' && selection.damage
   const canTarget = opponent && (selection?.kind === 'attacker' || spellSelected)
@@ -323,6 +368,8 @@ function ArenaSide({ side, view, opponent, selection, target, onOwnMinion, onEne
                 ]
                   .filter(Boolean)
                   .join(' · '),
+                art: artFor(minion.key),
+                artHeight: 40,
                 selected:
                   (!opponent && selection?.kind === 'attacker' && selection.index === minion.index) ||
                   (opponent && target === String(minion.index)),
@@ -381,6 +428,7 @@ function TablePage({ ctx }) {
   const [target, setTarget] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [, setArtVersion] = useState(0)
 
   const data = q.data
   const view = data && data.active ? data.view : null
@@ -397,6 +445,51 @@ function TablePage({ ctx }) {
     : attacker != null
       ? { kind: 'attacker', index: attacker }
       : null
+
+  const artKeys = useMemo(() => {
+    const keys = new Set(['card_back'])
+    if (!view) return [...keys]
+    for (const card of view.sides.player.hand || []) if (card.key) keys.add(card.key)
+    if (view.mode === 'gwent') {
+      for (const side of [view.sides.player, view.sides.opponent]) {
+        for (const row of ROWS) {
+          for (const card of side.rows?.[row] || []) if (card.key) keys.add(card.key)
+        }
+      }
+    } else {
+      for (const side of [view.sides.player, view.sides.opponent]) {
+        for (const minion of side.board || []) if (minion.key) keys.add(minion.key)
+      }
+    }
+    return [...keys].sort()
+  }, [view])
+  const artSignature = artKeys.join('|')
+
+  useEffect(() => {
+    let alive = true
+    const missing = artKeys.filter(key => !artCache.has(key))
+    if (!missing.length) return undefined
+    ;(async () => {
+      let changed = false
+      for (const key of missing) {
+        try {
+          const res = await ctx.rest('/art/' + encodeURIComponent(key))
+          if (res && res.data_url) {
+            artCache.set(key, res.data_url)
+            changed = true
+          }
+        } catch {
+          // The backend may be disabled; the text card still works.
+        }
+      }
+      if (alive && changed) setArtVersion(value => value + 1)
+    })()
+    return () => {
+      alive = false
+    }
+  }, [artSignature])
+
+  const artFor = key => (key ? artCache.get(key) : undefined)
 
   const clearSelection = () => {
     setHandSel(null)
@@ -503,7 +596,16 @@ function TablePage({ ctx }) {
   const header = jsxs('div', {
     style: S.header,
     children: [
-      jsx('div', { style: S.title, children: 'Table' }),
+      jsx('div', { style: S.title, children: 'TABLE' }),
+      jsx('span', {
+        style: {
+          color: C.accent,
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '18px',
+          lineHeight: '18px'
+        },
+        children: '▮'
+      }),
       jsx('div', { style: { ...S.subtle, flex: '1 1 auto' }, children: 'Gwent row warfare · Arena mana duel' }),
       jsx(Button, {
         size: 'xs',
@@ -548,6 +650,19 @@ function TablePage({ ctx }) {
         jsxs('div', {
           style: S.empty,
           children: [
+            artFor('card_back')
+              ? jsx('img', {
+                  src: artFor('card_back'),
+                  alt: '',
+                  draggable: false,
+                  style: {
+                    width: '128px',
+                    height: '128px',
+                    imageRendering: 'pixelated',
+                    border: `2px solid ${C.stroke}`
+                  }
+                })
+              : null,
             jsx('div', { style: S.title, children: 'Deal a table' }),
             jsx('div', { style: S.subtle, children: 'Both games run on the same engine the agent tools use.' }),
             jsxs('div', {
@@ -625,7 +740,7 @@ function TablePage({ ctx }) {
         style: S.board,
         children: [
           mode === 'gwent'
-            ? jsx(GwentSide, { side: view.sides.opponent, view })
+            ? jsx(GwentSide, { side: view.sides.opponent, view, artFor })
             : jsx(ArenaSide, {
                 side: view.sides.opponent,
                 view,
@@ -633,17 +748,19 @@ function TablePage({ ctx }) {
                 selection,
                 target,
                 onEnemyMinion,
-                onEnemyHero
+                onEnemyHero,
+                artFor
               }),
           mode === 'gwent'
-            ? jsx(GwentSide, { side: view.sides.player, view })
+            ? jsx(GwentSide, { side: view.sides.player, view, artFor })
             : jsx(ArenaSide, {
                 side: view.sides.player,
                 view,
                 opponent: false,
                 selection,
                 target,
-                onOwnMinion
+                onOwnMinion,
+                artFor
               })
         ]
       }),
@@ -670,6 +787,8 @@ function TablePage({ ctx }) {
                       title: card.name,
                       meta: handMeta(card, mode),
                       note: handNote(card, mode),
+                      art: artFor(card.key),
+                      artHeight: 62,
                       selected: handSel === card.index,
                       onClick: canAct ? () => onHand(card) : undefined,
                       dim: !canAct,

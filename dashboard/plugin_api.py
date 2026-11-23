@@ -6,8 +6,11 @@ the plugin root. Every response is hand-free for the opponent.
 
 from __future__ import annotations
 
+import base64
+import re
 import sys
 import threading
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +19,7 @@ from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import table_cards  # noqa: E402
 import table_engine  # noqa: E402
 import table_store  # noqa: E402
 from table_common import GameError  # noqa: E402
@@ -23,6 +27,13 @@ from table_render import public_view, render  # noqa: E402
 
 router = APIRouter()
 _LOCK = threading.Lock()
+_ART_DIR = Path(__file__).resolve().parents[1] / "art"
+
+
+@lru_cache(maxsize=128)
+def _art_bytes(stem: str) -> bytes:
+    path = _ART_DIR / f"{stem}.webp"
+    return path.read_bytes() if path.is_file() else b""
 
 
 class NewRequest(BaseModel):
@@ -127,3 +138,23 @@ def move(req: MoveRequest) -> dict:
 @router.get("/health")
 def health() -> dict:
     return {"ok": True, "plugin": "table"}
+
+
+@router.get("/art/{key}")
+def get_art(key: str) -> dict:
+    if not re.fullmatch(r"[a-z0-9_]{1,64}", key):
+        return {"ok": False, "error": "invalid card key"}
+    stem = table_cards.ART_BY_KEY.get(key)
+    if stem is None and key in set(table_cards.ART_BY_KEY.values()) | {table_cards.ART_BACK}:
+        stem = key
+    if stem is None:
+        return {"ok": False, "key": key, "error": "no art for that card"}
+    data = _art_bytes(stem)
+    if not data:
+        return {"ok": False, "key": key, "stem": stem, "error": "art file missing"}
+    return {
+        "ok": True,
+        "key": key,
+        "stem": stem,
+        "data_url": "data:image/webp;base64," + base64.b64encode(data).decode("ascii"),
+    }

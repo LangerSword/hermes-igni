@@ -279,6 +279,72 @@ class HiddenInformationTests(unittest.TestCase):
         self.assertEqual(payload["mode"], "arena")
 
 
+class PolishTests(unittest.TestCase):
+    """The pre-publish fixes: AI pass discipline, widget install, art coverage."""
+
+    def _fill(self, state: dict, side: str, count: int) -> None:
+        state["sides"][side]["hand"] = [gwent_card("poor_infantry") for _ in range(count)]
+
+    def test_ai_keeps_pressure_at_thirteen_point_lead(self):
+        state = blank_gwent()
+        state["sides"]["opponent"]["rows"]["ranged"] = [
+            gwent_card("catapult"),  # 8
+            gwent_card("ballista"),  # 6
+        ]
+        state["sides"]["player"]["rows"]["melee"] = [gwent_card("poor_infantry")]
+        self._fill(state, "opponent", 9)
+        self._fill(state, "player", 10)
+        action = table_gwent.ai_action(state, "opponent")
+        self.assertEqual(action["action"], "play", action)
+
+    def test_ai_banks_a_twenty_two_point_lead(self):
+        state = blank_gwent()
+        state["sides"]["opponent"]["rows"]["ranged"] = [
+            gwent_card("geralt"),  # 15
+            gwent_card("catapult"),  # 8
+        ]
+        state["sides"]["player"]["rows"]["melee"] = [gwent_card("poor_infantry")]
+        self._fill(state, "opponent", 9)
+        self._fill(state, "player", 10)
+        action = table_gwent.ai_action(state, "opponent")
+        self.assertEqual(action["action"], "pass", action)
+
+    def test_ai_banks_when_ahead_and_behind_on_cards(self):
+        state = blank_gwent()
+        state["sides"]["opponent"]["rows"]["siege"] = [
+            gwent_card("mangonel"),
+            gwent_card("mangonel"),
+            gwent_card("mangonel"),
+        ]
+        state["sides"]["player"]["rows"]["melee"] = [gwent_card("poor_infantry")]
+        self._fill(state, "opponent", 8)
+        self._fill(state, "player", 10)
+        action = table_gwent.ai_action(state, "opponent")
+        self.assertEqual(action["action"], "pass", action)
+
+    def test_widget_install_is_idempotent(self):
+        result = table_store.install_widget()
+        self.assertTrue(result.get("ok"), result)
+        path = Path(result["path"])
+        self.assertTrue(path.is_file())
+        self.assertEqual(path, table_store.hermes_home() / "tui-widgets" / "table-board.mjs")
+        again = table_store.install_widget()
+        self.assertTrue(again.get("ok"))
+        self.assertEqual(again["status"], "current")
+
+    def test_every_card_has_art(self):
+        keys = set()
+        for faction in table_cards.GWENT_POOLS:
+            keys.update(card["key"] for card in table_cards.build_gwent_deck(faction))
+        for deck in table_cards.ARENA_POOLS:
+            keys.update(card["key"] for card in table_cards.build_arena_deck(deck))
+        missing = keys - set(table_cards.ART_BY_KEY)
+        self.assertFalse(missing, missing)
+        root = Path(__file__).resolve().parents[1]
+        for stem in set(table_cards.ART_BY_KEY.values()):
+            self.assertTrue((root / "art" / f"{stem}.webp").is_file(), stem)
+
+
 class SelfPlayTests(unittest.TestCase):
     def _play(self, mode: str, seed: int, max_steps: int = 400) -> dict:
         state = table_engine.new_game(mode, seed)

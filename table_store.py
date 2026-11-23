@@ -7,9 +7,11 @@ documented and deliberately contains no hidden cards.
 
 from __future__ import annotations
 
+import filecmp
 import hashlib
 import json
 import os
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -104,3 +106,25 @@ def clear_active() -> None:
         active.unlink()
     except OSError:
         pass
+
+
+def install_widget() -> dict:
+    """Copy the bundled TUI scoreboard into this profile's widget directory.
+
+    The widget is a plain `.mjs` the TUI hot-loads; a Git install only gets the
+    plugin folder, so this is the supported way to put the scoreboard in place.
+    """
+    source = Path(__file__).resolve().parent / "tui" / "table-board.mjs"
+    if not source.is_file():
+        return {"ok": False, "error": "bundled widget missing from the plugin folder"}
+    target = hermes_home() / "tui-widgets" / "table-board.mjs"
+    if target.is_file() and filecmp.cmp(source, target, shallow=False):
+        return {"ok": True, "status": "current", "path": str(target)}
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        tmp = target.with_name(f"{target.name}.{os.getpid()}.tmp")
+        shutil.copy2(source, tmp)
+        os.replace(tmp, target)
+    except OSError as exc:
+        return {"ok": False, "error": f"could not install widget: {exc}"}
+    return {"ok": True, "status": "installed", "path": str(target)}

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Table — a Hermes plugin</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton-Regular.ttf'); }
+  @font-face { font-family: 'Playfair'; src: url('../assets/fonts/PlayfairDisplay.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Regular.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Bold.ttf'); font-weight: 700; }
+
+  :root {
+    --ink: #11100d;
+    --paper: #e7dcc2;
+    --paper-2: #d9cda9;
+    --cobalt: #1b4dff;
+    --verm: #c8452f;
+    --acid: #d8c34a;
+    --jade: #1e7a5a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #0b0a08; }
+
+  .sheet {
+    position: relative;
+    width: 1600px;
+    height: 900px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(255,255,255,.55), transparent 36%),
+      radial-gradient(circle at 82% 76%, rgba(80,96,84,.18), transparent 44%),
+      linear-gradient(120deg, #eee3c9 0%, var(--paper) 48%, #ddd0ae 100%);
+    color: var(--ink);
+    font-family: 'Plex', monospace;
+    padding: 48px 64px 42px;
+  }
+
+  /* xerox tooth + halftone */
+  .sheet::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(17,16,13,.22) 1px, transparent 1.5px);
+    background-size: 4px 4px;
+    opacity: .23;
+    mix-blend-mode: multiply;
+  }
+  /* scan haze */
+  .sheet::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(17,16,13,.06) 0 1px, transparent 1px 3px);
+    opacity: .5;
+    mix-blend-mode: multiply;
+  }
+
+  .grain {
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    opacity: .22;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/></svg>");
+  }
+
+  .masthead {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .brand {
+    font-family: 'Anton', sans-serif;
+    font-size: 54px;
+    line-height: .8;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+  }
+  .brand span { color: var(--cobalt); }
+  .mast-meta {
+    flex: 1;
+    text-align: right;
+    font-size: 12px;
+    line-height: 17px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .mast-meta b { color: var(--verm); }
+
+  .main {
+    position: relative;
+    display: grid;
+    grid-template-columns: 690px 1fr;
+    gap: 24px;
+    height: 660px;
+    padding-top: 30px;
+  }
+
+  .copy { position: relative; min-width: 0; }
+  .kicker {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--cobalt);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: 'Playfair', serif;
+    font-weight: 900;
+    font-size: 188px;
+    line-height: .78;
+    letter-spacing: -.055em;
+    margin: 0 0 30px -10px;
+    color: var(--ink);
+    display: inline-block;
+    padding-bottom: 8px;
+    border-bottom: 7px solid var(--cobalt);
+  }
+  .modes {
+    font-family: 'Anton', sans-serif;
+    font-size: 37px;
+    line-height: 1;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 18px;
+  }
+  .modes .g { color: var(--cobalt); }
+  .modes .a { color: var(--verm); }
+  .modes em { font-style: normal; color: var(--acid); }
+  .deck {
+    font-family: 'Playfair', serif;
+    font-size: 23px;
+    line-height: 1.35;
+    font-style: italic;
+    margin: 0 0 26px;
+    max-width: 520px;
+  }
+  .deck b { font-style: normal; }
+
+  .coupon {
+    position: relative;
+    width: 475px;
+    border: 3px solid var(--ink);
+    padding: 17px 20px 15px;
+    background: rgba(216,195,74,.22);
+  }
+  .coupon::after {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px dashed rgba(17,16,13,.6);
+    pointer-events: none;
+  }
+  .coupon-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 25px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .coupon-code {
+    display: inline-block;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    background: var(--cobalt);
+    color: var(--paper);
+    padding: 4px 9px;
+  }
+  .coupon-small {
+    margin-top: 9px;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(17,16,13,.72);
+  }
+  .stamp {
+    position: absolute;
+    right: -30px;
+    top: -34px;
+    width: 96px;
+    height: 96px;
+    border: 3px solid var(--verm);
+    border-radius: 50%;
+    color: #7a1d14;
+    font-family: 'Anton', sans-serif;
+    font-size: 19px;
+    line-height: 1.05;
+    letter-spacing: .06em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(-13deg);
+    opacity: .9;
+    box-shadow: inset 0 0 0 4px rgba(200,69,47,.18);
+    background: rgba(231,220,194,.75);
+  }
+
+  .fan {
+    position: relative;
+    min-width: 0;
+  }
+  .card {
+    position: absolute;
+    width: 248px;
+    height: 356px;
+    background: #f1e7cf;
+    border: 3px solid var(--ink);
+    box-shadow: 9px 11px 0 rgba(17,16,13,.18);
+    padding: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .card-a { left: 18px; top: 124px; transform: rotate(-8deg); border-color: var(--cobalt); }
+  .card-b { left: 226px; top: 68px; transform: rotate(1.5deg); border-color: var(--verm); z-index: 3; }
+  .card-c { left: 486px; top: 132px; transform: rotate(8deg); border-color: var(--jade); }
+  .card img {
+    display: block;
+    width: 100%;
+    height: 206px;
+    object-fit: cover;
+    image-rendering: pixelated;
+    border: 2px solid var(--ink);
+  }
+  .card-name {
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    min-height: 30px;
+  }
+  .card-type {
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(17,16,13,.65);
+  }
+  .card-bottom {
+    margin-top: auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-top: 1px solid rgba(17,16,13,.35);
+    padding-top: 6px;
+  }
+  .card-stat {
+    font-family: 'Anton', sans-serif;
+    font-size: 33px;
+    line-height: .9;
+  }
+  .card-a .card-stat { color: var(--cobalt); }
+  .card-b .card-stat { color: var(--verm); }
+  .card-c .card-stat { color: var(--jade); }
+  .card-set {
+    font-size: 8px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(17,16,13,.55);
+    text-align: right;
+  }
+
+  .footer {
+    position: absolute;
+    left: 64px;
+    right: 64px;
+    bottom: 34px;
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    padding-top: 10px;
+    border-top: 3px solid var(--ink);
+    box-shadow: 0 -7px 0 var(--acid);
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .footer .grow { flex: 1; }
+  .footer b { color: var(--ink); text-decoration: underline; text-decoration-color: var(--verm); text-decoration-thickness: 2px; }
+  .barcode {
+    width: 172px;
+    height: 38px;
+    background: repeating-linear-gradient(90deg,
+      var(--ink) 0 2px, transparent 2px 4px,
+      var(--ink) 4px 5px, transparent 5px 8px,
+      var(--ink) 8px 12px, transparent 12px 14px,
+      var(--ink) 14px 16px, transparent 16px 19px);
+    opacity: .9;
+  }
+
+  .reg {
+    position: absolute;
+    font-size: 17px;
+    line-height: 17px;
+    opacity: .45;
+  }
+  .reg.tl { left: 24px; top: 18px; }
+  .reg.tr { right: 24px; top: 18px; }
+  .reg.bl { left: 24px; bottom: 12px; }
+  .reg.br { right: 24px; bottom: 12px; }
+
+  .issue {
+    position: absolute;
+    right: 64px;
+    top: 112px;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(17,16,13,.62);
+    text-align: right;
+  }
+  .issue b { display: block; font-family: 'Anton', sans-serif; font-size: 29px; letter-spacing: .06em; color: var(--verm); }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="grain"></div>
+    <div class="reg tl">+</div><div class="reg tr">+</div><div class="reg bl">+</div><div class="reg br">+</div>
+
+    <header class="masthead">
+      <div class="brand">HERMES<span>.</span></div>
+      <div class="mast-meta">
+        an unofficial plugin for the hermes agent<br>
+        print artifact · <b>vol. 0.2</b> · 2026
+      </div>
+    </header>
+
+    <div class="issue">
+      card game supplement
+      <b>TABLE</b>
+      gwent // arena
+    </div>
+
+    <main class="main">
+      <section class="copy">
+        <div class="kicker">a card game for one agent</div>
+        <h1>TABLE</h1>
+        <div class="modes"><span class="g">GWENT</span> <em>//</em> <span class="a">ARENA</span></div>
+        <p class="deck">
+          Two decks. Hidden hands. A rule engine that says <b>no</b>.<br>
+          Ask Hermes to deal.
+        </p>
+        <div class="coupon">
+          <div class="coupon-title">Ask Hermes to deal</div>
+          <div class="coupon-code">table_new</div>
+          <div class="coupon-small">gwent · arena · no dice · no network · 1 player &amp; 1 agent</div>
+          <div class="stamp">1<br>player</div>
+        </div>
+      </section>
+
+      <section class="fan">
+        <div class="card card-a">
+          <img src="../art/gwent_hero_ash.webp" alt="">
+          <div class="card-name">Geralt of Rivia</div>
+          <div class="card-type">melee hero · immune to weather</div>
+          <div class="card-bottom"><div class="card-stat">15</div><div class="card-set">Ashen Crown<br>tbl—001</div></div>
+        </div>
+        <div class="card card-b">
+          <img src="../art/gwent_hero_lady.webp" alt="">
+          <div class="card-name">Philippa Eilhart</div>
+          <div class="card-type">ranged hero · immune to weather</div>
+          <div class="card-bottom"><div class="card-stat">10</div><div class="card-set">Ashen Crown<br>tbl—002</div></div>
+        </div>
+        <div class="card card-c">
+          <img src="../art/gwent_hero_obsidian.webp" alt="">
+          <div class="card-name">Letho of Gulet</div>
+          <div class="card-type">melee hero · immune to weather</div>
+          <div class="card-bottom"><div class="card-stat">7</div><div class="card-set">Obsidian Court<br>tbl—003</div></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>hermes-table<br><b>github.com/LangerSword/hermes-table</b></div>
+      <div class="grow"></div>
+      <div class="barcode"></div>
+      <div>tbl—002<br>1 player · 1 agent</div>
+    </footer>
+  </div>
+</body>
+</html>
