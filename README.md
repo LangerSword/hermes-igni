@@ -1,242 +1,201 @@
 # Igni
 
-**Card games at the sign of fire.** Two real, deterministic engines — a Gwent-shaped
-row war and a Hearthstone-shaped mana duel — played against a rule-based
-opponent that keeps its hand hidden. Play from chat with the agent, from a live
-TUI scoreboard, or from a full desktop page with clickable cards.
+**A Witcher-inspired card game plugin for Hermes Agent.** Igni runs two real,
+deterministic card games against a hidden-hand opponent, with pixel-art cards
+and a rule engine that validates every move. Play from chat, the TUI, or a
+clickable desktop table.
 
-The plugin is **Igni**; `table` is its game surface (`table_*` tools,
-`/table`, `hermes table`). No API keys, no network, stdlib only on the engine side.
+[![tests](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml/badge.svg)](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-![Igni — a Hermes plugin cover](docs/cover.png)
+![Igni cover: a print artifact with the word IGNI and a fanned pixel hand](docs/cover.png)
 
-![Igni table page with pixel-art cards](docs/desktop.png)
+## What is Igni?
 
+Igni is an unofficial [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+plugin named after the Witcher sign of fire. It ships two complete card games:
 
-```text
-GWENT · round 2/3 · your move
+- **Gwent**: rows, weather, spies, horns, scorch, best of three.
+- **Arena**: 30 health, mana, taunts, charge, divine shield, spells.
 
-Opponent · Nilfgaard · score 26 · rounds 1 · hand 6 · deck 4
-  melee  ▸ Impera Brigade 4 · Alba Pikemen 3          = 7
-  ranged ▸ Black Infantry Archer 6                    = 6
-  siege  ▸ Mangonel 6 · Menno Coehoorn 10             = 16
-  hand    ▸ 6 hidden card(s)
+The opponent is a local rule-based AI. It sees its own hand and the public
+board, never yours. The agent is the referee, not the player: it asks for your
+move, relays it exactly, and shows the new board.
 
-You · Northern Realms · score 16 · rounds 0 · hand 7 · deck 4
-  melee  ▸ Blue Stripes Commando 4 · Redanian Elite 5 = 9
-  ranged ▸ —                                          = 0
-  siege  ▸ Ballista 6                                 = 6
-
-Weather: Biting Frost (melee)
-Rounds won: you 0 — opponent 1
-
-HAND
-  [1] Ballista · siege · 6
-  [2] Commander's Horn · special · double a row (add row)
-  [3] Sigismund Dijkstra · spy · 4 · played to the enemy, draw 2
-  ...
-
-Your move: play <hand#> [row] for a horn, or pass.
-```
-
-## Why this exists
-
-A game is a better demo of an agent than another dashboard. It has real state, a
-visible opponent, hidden information, and a rule engine that says *no*. Igni
-puts that inside Hermes without turning the agent into a rules lawyer: the
-engine validates every move, the agent relays yours, and the opponent's hand
-never leaves the process.
-
-## Modes
-
-### Gwent — best of three, rows and weather
-
-- Rows: melee, ranged, siege.
-- Win two rounds. A round ends when both sides pass; a tie awards it to both.
-- Weather sets every **non-hero** unit on one row to 1, for both sides.
-- Commander's Horn doubles one of your rows. Clear Weather removes all weather.
-- Spies join the enemy row and draw you two cards.
-- Scorch destroys the strongest non-hero unit(s) on the board — both sides.
-- Heroes are immune to weather. Hands and draw piles carry between rounds; the
-  board, weather and horns clear.
-
-### Arena — a mana duel to zero
-
-- 30 health, mana 1→10, refill each turn, draw one.
-- Minions have summoning sickness unless they have Charge.
-- Taunts must be attacked first; Divine Shield absorbs the first hit.
-- Battlecries: draw, heal, or damage all enemy minions.
-- Empty deck deals rising fatigue damage.
-
-The rules engines and illustrations are original. Gwent mode is an unaffiliated
-fan homage to the row-war mini-game; its character names belong to their
-owners. Arena mode is original. No assets from a commercial game are used.
-
-## Art
-
-- **Cover:** a recent-Nous-style print artifact — newsprint, halftone, cobalt /
-  vermilion / acid inks, registration marks, a mail-order coupon and a fanned
-  pixel hand. Source in `cover/cover.html`; render with
-  `python3 scripts/render_cover.py`.
-- **Cards:** 256 px, 24-colour pure pixel art in `art/`. Every card key maps to
-  an archetype print; the frame, title and stats keep each card distinct. Rebuild
-  with `python3 scripts/build_card_art.py`; contact sheet in
-  `docs/card-art-grid.png`.
-- **Desktop:** cards render with `image-rendering: pixelated`, a hard 2 px frame
-  and a scanline panel. The TUI stays typographic — the board is the art there.
-
-![Twenty-one pixel card archetypes](docs/card-art-grid.png)
-
-
-## Play from chat
-
-The tools are `table_new`, `table_play`, `table_state`, `table_rules`.
-
-```text
-you    play gwent
-hermes ┌──────────────────────────────┐
-       │ table_new { mode: gwent }     │
-       └──────────────────────────────┘
-       [board, your move]
-
-you    play 3
-hermes ┌──────────────────────────────┐
-       │ table_play { action: play,    │
-       │              card: 3 }        │
-       └──────────────────────────────┘
-       You play Blue Stripes Commando (4) to melee.
-       Opponent plays Impera Brigade (4) to melee.
-       [new board]
-```
-
-Arena moves: `play <hand#>` (add a target for a damage spell),
-`attack <your board#> <enemy board#|hero>`, `end turn`.
-Gwent moves: `play <hand#>`, `play <hand#> <row>` for the horn, `pass`.
-
-The agent is the referee, not the player: it asks for your move, relays it
-exactly, and never reveals the hidden hand.
-
-## Slash command
-
-```text
-/table                     show the active board
-/table rules [mode]        rules + the full card pool
-/table new [gwent|arena] [seed]
-/table install-widget      put the TUI scoreboard in place
-```
-
-## Terminal
-
-The CLI is a thin shim over the same engine, so it can also serve as the demo:
-
-```bash
-python3 table_cli.py demo gwent --seed 7     # AI vs AI, full transcript
-python3 table_cli.py demo arena --seed 3
-python3 table_cli.py play gwent              # play in this terminal
-python3 table_cli.py rules arena
-```
-
-`hermes table …` is wired too when the plugin runs in-process; under
-`plugins.isolation: host` the host skips CLI subcommands, so use the Python
-entry point above.
-
-## TUI
-
-`tui/table-board.mjs` is an ambient scoreboard. `table_new` installs it into
-`$HERMES_HOME/tui-widgets/` on first use; `hermes table install-widget` and
-`/table install-widget` do the same by hand.
-
-```text
-/table-board
-```
-
-It reads the hand-free snapshot at `$HERMES_HOME/igni/board.json` once a
-second. It never includes the opponent's cards.
-
-## Desktop
-
-The same package ships the desktop half:
-
-```text
-desktop/plugin.js       full page at /table, clickable cards, sidebar nav row,
-                        ⌘K "Igni: open the card table", statusbar chip
-dashboard/plugin_api.py /api/plugins/igni/{state,new,move,rules,art/{key}}
-```
-
-The page plays both games without the chat agent: click a card, pick a row or
-target, summon, attack, pass. It polls the backend and also subscribes to
-`plugin.igni.moved`.
-
-The desktop half loads by default for this package; turn it off in
-**Capabilities → Plugins → Igni** if you don't want it. The Python half
-is gated separately by `hermes plugins enable igni`.
+No API keys. No network. No model calls. The engine is Python standard library;
+the desktop page uses the Hermes plugin SDK.
 
 ## Install
 
-From this checkout:
+Requires Hermes Agent 0.23 or newer. The engine has no third-party runtime
+dependencies.
 
 ```bash
+hermes plugins install LangerSword/hermes-igni
+hermes plugins enable igni
+hermes table install-widget
+```
+
+Open a new Hermes session for the tools. The TUI widget is optional; open it
+with `/table-board`. In the desktop app, open **Capabilities → Plugins → Igni**.
+The desktop half loads by default; the Python half is gated by `plugins enable`.
+
+From a checkout, replace the first two commands with:
+
+```bash
+git clone https://github.com/LangerSword/hermes-igni
+cd hermes-igni
 python3 scripts/sync_plugin.py
 hermes plugins enable igni
 hermes table install-widget
 ```
 
-Then start a new session (tools and the prompt section land next session; hooks
-and slash commands hot-reload). Reload the TUI widgets with `/widgets-reload`
-and open `/table-board`. In the desktop app, rescan plugins and open Igni.
+`table` is the game surface: `table_*` tools, the `/table` command, and
+`hermes table`. The plugin name is **Igni**.
 
-Once the repo is published, `hermes plugins install LangerSword/hermes-igni`
-installs the same folder.
+## Play
+
+```text
+you:    play gwent
+hermes: [table_new, board, asks for your move]
+
+you:    play 3
+hermes: [table_play, your card, the opponent's reply, new board]
+```
+
+Arena moves: `play <hand#>`, `attack <your board#> <enemy board#|hero>`,
+`end turn`. Gwent moves: `play <hand#>`, `play <hand#> <row>` for the horn,
+`pass`.
+
+Slash commands:
+
+```text
+/table                     show the active board
+/table rules [mode]        rules and the full card pool
+/table new [gwent|arena] [seed]
+/table install-widget
+```
+
+Desktop:
+
+```text
+sidebar: Igni
+palette: Igni: open the card table
+chip:    🔥 igni
+page:    /table
+```
+
+![Igni desktop table with pixel-art cards](docs/desktop.png)
+
+CLI, including an AI-vs-AI demo:
+
+```bash
+hermes table demo gwent --seed 7
+hermes table play arena
+python3 table_cli.py demo gwent --seed 7
+```
+
+`hermes table` runs when the plugin is loaded in-process. Under
+`plugins.isolation: host` the host skips CLI subcommands; use the Python entry
+point.
+
+## The two games
+
+### Gwent, best of three
+
+- Rows: melee, ranged, siege.
+- Win two rounds. A round ends when both sides pass; a tie awards it to both.
+- Weather sets every non-hero unit on one row to 1, for both sides.
+- Commander's Horn doubles one row. Clear Weather removes all weather.
+- Spies join the enemy row and draw two cards. Scorch destroys the strongest
+  non-hero unit(s) on the board, both sides.
+- Heroes are immune to weather. Hands carry between rounds; the board clears.
+
+### Arena, a mana duel
+
+- 30 health, mana 1 to 10, refill each turn, draw one.
+- Minions have summoning sickness unless they have Charge.
+- Taunts must be attacked first; Divine Shield absorbs the first hit.
+- Battlecries draw, heal, or damage all enemy minions.
+- An empty deck deals rising fatigue damage.
+
+## Art
+
+- **Cover:** a Nous-style print artifact, 1600×900, in `docs/cover.png`. Source:
+  `cover/cover.html`, rendered with `python3 scripts/render_cover.py`.
+- **Cards:** 21 WebP files in `art/`, each 256×256 and quantized to 24 colours.
+  Pure pixel art, `image-rendering: pixelated`, written for this project.
+  Rebuild with `python3 scripts/build_card_art.py`.
+- **Desktop:** pixel cards on hard 2 px frames and scanline panels. The TUI
+  stays typographic; the board is the art there.
+
+![Twenty-one pixel card archetypes](docs/card-art-grid.png)
+
+## How it works
+
+```text
+table_new / table_play
+        │
+        ▼
+   table_engine ──────► table_gwent | table_arena
+        │                         │
+        │                         ▼
+        │                 profile-scoped JSON state
+        ├──────────────► hand-free widget snapshot
+        └──────────────► /api/plugins/igni (desktop)
+```
+
+Four invariants carry the plugin:
+
+1. **The opponent hand never crosses a boundary.** It stays in the engine.
+   `public_view`, the widget snapshot and every tool result carry counts only.
+2. **The same seed gives the same deal.** The engines are deterministic and the
+   AI reads only its own hand plus the public board.
+3. **One call resolves both sides.** `table_play` applies your move and the
+   opponent's reply before it returns, so a chat turn never ends waiting.
+4. **State is profile-scoped and atomic.** One active table per profile, JSON
+   written with a temporary file and `os.replace`.
 
 ## Verify
 
 ```bash
-python3 -m unittest discover -s tests -v   # 29 behaviour tests
-python3 smoke_test.py --show               # both modes, 20 seeds, plus a board
+python3 -m unittest discover -s tests -v   # 29 tests
+python3 smoke_test.py                      # 40 self-played matches
 python3 smoke_load.py                      # real register() + tool dispatch
-hermes plugins validate .                  # manifest + capability probe
+hermes plugins validate .                  # manifest and capability probe
 ```
 
-What the tests prove: deck sizes, weather/horn/hero scoring, spy draw, scorch,
-round ties and match draws, mana/summon/taunt/lethal, AI turns finishing,
-AI pass discipline, hidden-hand boundaries in `public_view`/snapshot/tools,
-tool errors as JSON, widget install, art coverage, persistence, backend routes,
-and AI-vs-AI termination on every seed.
+The tests cover deck sizes, scoring, spies, scorch, round ties, mana, taunts,
+lethal attacks, AI pass discipline, hidden-hand boundaries, tool errors,
+widget install, art coverage, persistence, backend routes, and self-play
+termination. The CI badge runs the first three on every push.
 
-## Layout
+## FAQ
 
-```text
-__init__.py          register(): tools, /table, hermes table, prompt section
-table_cards.py       original card pools, deck builders, rules text, art map
-table_common.py      GameError + side helpers
-table_gwent.py       row war: scoring, weather, spies, horns, scorch, AI
-table_arena.py       mana duel: combat, taunts, spells, battlecries, AI
-table_render.py      chat board, structured public view, widget snapshot
-table_engine.py      mode dispatch + the opponent's reply inside one call
-table_store.py       profile-scoped state, atomic snapshot, widget install
-table_tools.py       the four tool specs and handlers
-table_cli.py         /table, hermes table, standalone CLI, interactive play
-tui/table-board.mjs  ambient TUI scoreboard
-desktop/plugin.js    desktop page: pixel cards, click-to-play, /art cache
-dashboard/           FastAPI router for state, moves and card art
-art/                 256px / 24-colour pixel card art (WebP)
-cover/cover.html     the print-artifact cover source
-assets/fonts/        Anton / Playfair / IBM Plex / Press Start / VT323
-docs/                cover, desktop screenshot, card contact sheet
-tests/               stdlib unittest
-scripts/             sync, art build, cover render, desktop probe
-```
+**Does Igni need an API key?** No. The engine is local and uses no network.
 
-State lives in the plugin data directory (one active table per profile) and in
-`$HERMES_HOME/igni/board.json` for the widget. Both are JSON and atomic.
+**Can the agent see my hand?** The opponent cannot. The agent relays your move
+and sees the public board; the opponent's hidden hand never enters a tool
+result, snapshot, or desktop response.
 
-## Limits
+**Is this an official Witcher game?** No. It is an unaffiliated fan project.
+The Witcher and Gwent names belong to CD Projekt Red. The Arena mode, rules
+engines, code and pixel art are original.
 
-- The AI is a heuristic opponent, not a tournament engine. It plays legal,
-  tempo-aware moves; it will not surprise you with a meta deck.
-- No multiplayer, no network, no persistence beyond the active table.
-- The two modes are compact by design: a readable ruleset that fits in a tool
-  result beats a card database.
+**Does it work in Discord or Telegram?** The tools work in any Hermes session.
+The TUI scoreboard and desktop page are local surfaces.
+
+**Where is the game state?** Under the Hermes plugin data directory, plus a
+hand-free scoreboard snapshot at `$HERMES_HOME/igni/board.json`.
+
+## Credits
+
+Built for Hermes Agent. Fonts are under the SIL Open Font License; see
+`assets/fonts/README.md` and the `OFL-*.txt` files. Pixel art was generated for
+this project and quantized to 24 colours. No assets from a commercial game are
+included.
+
+If Igni earns a spot in your setup, star the repo. That is the whole ask.
 
 ## License
 
