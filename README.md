@@ -6,6 +6,7 @@ and a rule engine that validates every move. Play from chat, the TUI, or a
 clickable desktop table.
 
 [![tests](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml/badge.svg)](https://github.com/LangerSword/hermes-igni/actions/workflows/tests.yml)
+[![Hermes Catalog PR #159369](https://img.shields.io/badge/Hermes%20Catalog-PR%20%23159369-d97706)](https://github.com/NousResearch/hermes-agent/pull/159369)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **[60 second demo](https://github.com/LangerSword/hermes-igni/releases/tag/v0.3.1)**: the real table, both games, and the hidden-hand boundary.
