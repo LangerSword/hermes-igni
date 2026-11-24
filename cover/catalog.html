@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Igni — catalog banner (2:1)</title>
+<style>
+  @font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton-Regular.ttf'); }
+  @font-face { font-family: 'Playfair'; src: url('../assets/fonts/PlayfairDisplay.ttf'); font-weight: 100 900; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Regular.ttf'); font-weight: 400; }
+  @font-face { font-family: 'Plex'; src: url('../assets/fonts/IBMPlexMono-Bold.ttf'); font-weight: 700; }
+
+  :root {
+    --ink: #11100d;
+    --paper: #e7dcc2;
+    --cobalt: #1b4dff;
+    --verm: #c8452f;
+    --acid: #d8c34a;
+    --jade: #1e7a5a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #0b0a08; }
+
+  .sheet {
+    position: relative;
+    width: 1200px;
+    height: 600px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 16% 10%, rgba(255,255,255,.55), transparent 38%),
+      radial-gradient(circle at 84% 82%, rgba(80,96,84,.20), transparent 46%),
+      linear-gradient(118deg, #efe4cb 0%, var(--paper) 46%, #dccfab 100%);
+    color: var(--ink);
+    font-family: 'Plex', monospace;
+    padding: 26px 44px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  /* halftone tooth */
+  .sheet::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(17,16,13,.24) 1px, transparent 1.4px);
+    background-size: 4px 4px; opacity: .24; mix-blend-mode: multiply;
+  }
+  /* scan haze */
+  .sheet::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(17,16,13,.06) 0 1px, transparent 1px 3px);
+    opacity: .45; mix-blend-mode: multiply;
+  }
+  .grain {
+    position: absolute; inset: -20%; pointer-events: none; opacity: .20; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/></svg>");
+  }
+
+  .reg { position: absolute; font-size: 13px; line-height: 13px; opacity: .42; }
+  .reg.tl { left: 16px; top: 12px; } .reg.tr { right: 16px; top: 12px; }
+  .reg.bl { left: 16px; bottom: 10px; } .reg.br { right: 16px; bottom: 10px; }
+
+  .masthead {
+    position: relative; display: flex; align-items: flex-end; gap: 18px;
+    padding-bottom: 9px; border-bottom: 3px solid var(--ink);
+  }
+  .brand { font-family: 'Anton', sans-serif; font-size: 34px; line-height: .78; letter-spacing: .04em; text-transform: uppercase; }
+  .brand span { color: var(--cobalt); }
+  .mast-meta { flex: 1; text-align: right; font-size: 9.5px; line-height: 14px; letter-spacing: .13em; text-transform: uppercase; }
+  .mast-meta b { color: var(--verm); }
+
+  .main {
+    position: relative; display: grid; grid-template-columns: 1fr 356px;
+    gap: 28px; padding-top: 22px; flex: 1 1 auto; min-height: 0;
+  }
+
+  .kicker { font-size: 10.5px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; color: var(--cobalt); margin: 2px 0 6px; }
+  h1 {
+    font-family: 'Playfair', serif; font-weight: 900; font-size: 122px; line-height: .78;
+    letter-spacing: -.045em; margin: 2px 0 16px 0; display: inline-block;
+    padding-bottom: 5px; border-bottom: 6px solid var(--cobalt);
+  }
+  .modes { font-family: 'Anton', sans-serif; font-size: 25px; line-height: 1; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 11px; }
+  .modes .g { color: var(--cobalt); } .modes .a { color: var(--verm); } .modes em { font-style: normal; color: var(--acid); }
+  .deck { font-family: 'Playfair', serif; font-size: 15px; line-height: 1.34; font-style: italic; margin: 0 0 15px; max-width: 400px; }
+  .deck b { font-style: normal; }
+
+  .coupon { position: relative; width: 322px; border: 2.5px solid var(--ink); padding: 11px 14px 10px; background: rgba(216,195,74,.22); }
+  .coupon::after { content: ""; position: absolute; inset: 5px; border: 1px dashed rgba(17,16,13,.6); pointer-events: none; }
+  .coupon-title { font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 4px; }
+  .coupon-code { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: .04em; background: var(--cobalt); color: var(--paper); padding: 3px 7px; }
+  .coupon-small { margin-top: 6px; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: rgba(17,16,13,.72); }
+  .stamp {
+    position: absolute; right: -20px; top: -22px; width: 64px; height: 64px;
+    border: 2.5px solid var(--verm); border-radius: 50%; color: #7a1d14;
+    font-family: 'Anton', sans-serif; font-size: 13px; line-height: 1.05; letter-spacing: .05em;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    text-transform: uppercase; transform: rotate(-13deg); opacity: .92;
+    box-shadow: inset 0 0 0 3px rgba(200,69,47,.18); background: rgba(231,220,194,.78);
+  }
+
+  .fan { position: relative; min-width: 0; }
+  .card {
+    position: absolute; width: 158px; height: 228px; background: #f1e7cf;
+    border: 2.5px solid var(--ink); box-shadow: 6px 8px 0 rgba(17,16,13,.18);
+    padding: 7px; display: flex; flex-direction: column; gap: 5px;
+  }
+  .card-a { left: 2px; top: 56px; transform: rotate(-7deg); border-color: var(--cobalt); }
+  .card-b { left: 186px; top: 26px; transform: rotate(5deg); border-color: var(--verm); z-index: 2; }
+  .card img { display: block; width: 100%; height: 122px; object-fit: cover; image-rendering: pixelated; border: 2px solid var(--ink); }
+  .card-name { font-size: 9px; line-height: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; min-height: 22px; }
+  .card-type { font-size: 6.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(17,16,13,.65); }
+  .card-bottom { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; border-top: 1px solid rgba(17,16,13,.35); padding-top: 4px; }
+  .card-stat { font-family: 'Anton', sans-serif; font-size: 23px; line-height: .9; }
+  .card-a .card-stat { color: var(--cobalt); } .card-b .card-stat { color: var(--verm); }
+  .card-set { font-size: 6px; letter-spacing: .13em; text-transform: uppercase; color: rgba(17,16,13,.55); text-align: right; }
+
+  .strip {
+    position: relative; display: flex; gap: 26px; align-items: baseline;
+    border-top: 2px solid var(--ink); padding-top: 9px; margin-top: 14px;
+  }
+  .strip div { font-size: 8.5px; letter-spacing: .11em; text-transform: uppercase; color: rgba(17,16,13,.75); }
+  .strip b { font-family: 'Anton', sans-serif; font-size: 15px; letter-spacing: .05em; color: var(--ink); margin-right: 5px; }
+  .strip .grow { flex: 1; }
+  .barcode {
+    width: 132px; height: 26px; opacity: .9;
+    background: repeating-linear-gradient(90deg,
+      var(--ink) 0 2px, transparent 2px 4px,
+      var(--ink) 4px 5px, transparent 5px 8px,
+      var(--ink) 8px 12px, transparent 12px 14px,
+      var(--ink) 14px 16px, transparent 16px 19px);
+  }
+  .band { box-shadow: 0 6px 0 var(--acid); }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="grain"></div>
+    <div class="reg tl">+</div><div class="reg tr">+</div><div class="reg bl">+</div><div class="reg br">+</div>
+
+    <header class="masthead">
+      <div class="brand">HERMES<span>.</span></div>
+      <div class="mast-meta">
+        an unofficial plugin for the hermes agent<br>
+        catalog banner · <b>vol. 0.3</b> · 2026
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="copy">
+        <div class="kicker">a card game at the sign of fire</div>
+        <h1>IGNI</h1>
+        <div class="modes"><span class="g">GWENT</span> <em>//</em> <span class="a">ARENA</span></div>
+        <p class="deck">
+          Two decks. Hidden hands. A rule engine that says <b>no</b>.<br>
+          Ask Hermes to deal.
+        </p>
+        <div class="coupon">
+          <div class="coupon-title">Ask Hermes to deal</div>
+          <div class="coupon-code">table_new</div>
+          <div class="coupon-small">gwent · arena · no dice · no network · offline</div>
+          <div class="stamp">1<br>player</div>
+        </div>
+      </section>
+
+      <section class="fan">
+        <div class="card card-a">
+          <img src="../art/gwent_hero_ash.webp" alt="">
+          <div class="card-name">Geralt of Rivia</div>
+          <div class="card-type">melee hero · immune to weather</div>
+          <div class="card-bottom"><div class="card-stat">15</div><div class="card-set">Ashen Crown<br>ig—001</div></div>
+        </div>
+        <div class="card card-b">
+          <img src="../art/gwent_hero_lady.webp" alt="">
+          <div class="card-name">Philippa Eilhart</div>
+          <div class="card-type">ranged hero · immune to weather</div>
+          <div class="card-bottom"><div class="card-stat">10</div><div class="card-set">Ashen Crown<br>ig—002</div></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="strip band">
+      <div><b>21</b>pixel-art cards</div>
+      <div><b>2</b>engines</div>
+      <div><b>4</b>tools</div>
+      <div><b>0</b>network calls</div>
+      <div class="grow"></div>
+      <div class="barcode"></div>
+      <div>github.com/LangerSword/hermes-igni</div>
+    </div>
+  </div>
+</body>
+</html>

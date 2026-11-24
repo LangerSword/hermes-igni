@@ -126,6 +126,10 @@ point.
 
 - **Cover:** a Nous-style print artifact, 1600×900, in `docs/cover.png`. Source:
   `cover/cover.html`, rendered with `python3 scripts/render_cover.py`.
+- **Catalog banner:** the 2:1 image the Hermes plugin catalog shows on Igni's card,
+  1200×600, in `docs/banner.png`. Source: `cover/catalog.html`, same renderer.
+  The catalog spec requires 2:1, so this is its own composition rather than a crop
+  of the 16:9 cover.
 - **Cards:** 21 WebP files in `art/`, each 256×256 and quantized to 24 colours.
   Pure pixel art, `image-rendering: pixelated`, written for this project.
   Rebuild with `python3 scripts/build_card_art.py`.

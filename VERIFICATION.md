@@ -85,6 +85,10 @@ Opponent play Tibor Eggebracht (10) to ranged.
   `docs/cover.png` at 1600×900. Newsprint, halftone, cobalt / vermilion / acid
   inks, registration crosses, coupon and a fanned pixel hand. The type is real
   Anton / Playfair / IBM Plex Mono, not generated lettering.
+- **Catalog banner:** `cover/catalog.html` rendered by the same script to
+  `docs/banner.png` at 1200×600 — the 2:1 card image the Hermes plugin catalog
+  displays. Same ink and type system at a size that survives a card thumbnail;
+  indexed to 256 colours so the card downloads ~225 KB, not ~900 KB.
 - **Cards:** 21 WebP files in `art/`, each 256×256 and quantized to 24 colours
   from a 1K generation. The contact sheet is `docs/card-art-grid.png`.
   `scripts/build_card_art.py` rebuilds them from the raw cache.
